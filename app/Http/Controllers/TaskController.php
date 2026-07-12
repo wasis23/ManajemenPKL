@@ -1,0 +1,193 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Task;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class TaskController extends Controller
+{
+    /**
+     * Create a new task (Admin, Dosen, Staf)
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'quota' => 'required|integer|min:1',
+        ]);
+
+        $user = auth()->user();
+        if ($user->role === 'anak_pkl') {
+            return redirect()->back()->with('error', 'Hanya dosen, staf, atau admin yang dapat membuat tugas.');
+        }
+
+        Task::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'reporter_id' => $user->id,
+            'quota' => $request->quota,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->back()->with('success', 'Tugas berhasil dilaporkan.');
+    }
+
+    /**
+     * Student takes a task (Anak PKL)
+     */
+    public function take(Task $task)
+    {
+        $user = auth()->user();
+        if ($user->role !== 'anak_pkl') {
+            return redirect()->back()->with('error', 'Hanya anak PKL yang dapat mengambil tugas.');
+        }
+
+        // Check if student has checked in today and has not checked out today
+        $today = now()->toDateString();
+        $attendance = \App\Models\Attendance::where('user_id', $user->id)
+            ->where('date', $today)
+            ->first();
+
+        if (!$attendance || !$attendance->check_in || $attendance->status === 'rejected') {
+            return redirect()->back()->with('error', 'Anda harus melakukan absen masuk hari ini sebelum dapat mengambil tugas.');
+        }
+
+        if ($attendance->check_out) {
+            return redirect()->back()->with('error', 'Anda tidak dapat mengambil tugas setelah melakukan absen pulang.');
+        }
+
+        if ($task->status !== 'pending') {
+            return redirect()->back()->with('error', 'Tugas ini tidak lagi tersedia.');
+        }
+
+        // Check if student already has a pending or in-progress task
+        $hasActiveTask = $user->tasks()->whereIn('status', ['pending', 'proses'])->exists();
+        if ($hasActiveTask) {
+            return redirect()->back()->with('error', 'Anda hanya dapat mengambil satu tugas aktif pada satu waktu.');
+        }
+
+        // Check if student already took this task
+        if ($task->students()->where('user_id', $user->id)->exists()) {
+            return redirect()->back()->with('error', 'Anda sudah mengambil tugas ini.');
+        }
+
+        // Check quota before assigning
+        $currentAssigned = $task->students()->count();
+        if ($currentAssigned >= $task->quota) {
+            $task->update(['status' => 'proses']);
+            return redirect()->back()->with('error', 'Kuota tugas ini sudah penuh.');
+        }
+
+        // Assign student to task
+        $task->students()->attach($user->id);
+        
+        // Re-evaluate quota count
+        $newAssigned = $task->students()->count();
+        if ($newAssigned >= $task->quota) {
+            $task->update(['status' => 'proses']);
+        }
+
+        return redirect()->back()->with('success', 'Tugas berhasil diambil. Silakan kerjakan bersama tim Anda.');
+    }
+
+    /**
+     * Student cancels a pending task (Anak PKL)
+     */
+    public function cancel(Task $task)
+    {
+        $user = auth()->user();
+        if ($user->role !== 'anak_pkl') {
+            return redirect()->back()->with('error', 'Hanya anak PKL yang dapat membatalkan tugas.');
+        }
+
+        // Check if student is assigned to this task
+        if (!$task->students()->where('user_id', $user->id)->exists()) {
+            return redirect()->back()->with('error', 'Anda tidak ditugaskan pada tugas ini.');
+        }
+
+        // Can only cancel if task status is pending
+        if ($task->status !== 'pending') {
+            return redirect()->back()->with('error', 'Tugas yang sedang dikerjakan tidak dapat dibatalkan.');
+        }
+
+        // Detach user
+        $task->students()->detach($user->id);
+
+        return redirect()->back()->with('success', 'Pengambilan tugas berhasil dibatalkan.');
+    }
+
+    /**
+     * Student completes a task (Anak PKL)
+     */
+    public function complete(Request $request, Task $task)
+    {
+        $request->validate([
+            'is_assisted' => 'required|boolean',
+            'proof_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // max 5MB
+        ]);
+
+        $user = auth()->user();
+        if ($user->role !== 'anak_pkl') {
+            return redirect()->back()->with('error', 'Hanya anak PKL yang dapat menyelesaikan tugas.');
+        }
+
+        // Check if student is assigned to this task
+        if (!$task->students()->where('user_id', $user->id)->exists()) {
+            return redirect()->back()->with('error', 'Anda tidak ditugaskan pada tugas ini.');
+        }
+
+        if ($task->status !== 'proses') {
+            return redirect()->back()->with('error', 'Tugas ini tidak dalam proses pengerjaan.');
+        }
+
+        // Upload proof photo
+        $path = null;
+        if ($request->hasFile('proof_photo')) {
+            $path = $request->file('proof_photo')->store('proofs', 'public');
+        }
+
+        // Update task status
+        $task->update([
+            'status' => 'sukses',
+            'is_assisted' => $request->is_assisted,
+            'proof_photo' => $path,
+        ]);
+
+        // Award points to all assigned students
+        $points = $request->is_assisted ? 1 : 2;
+        foreach ($task->students as $student) {
+            $student->increment('points', $points);
+        }
+
+        return redirect()->back()->with('success', 'Tugas berhasil diselesaikan! Poin Anda telah ditambahkan.');
+    }
+
+    /**
+     * Delete a task (Admin, Dosen, Staf)
+     */
+    public function destroy(Task $task)
+    {
+        $user = auth()->user();
+        
+        // Tasks with status 'proses' or 'sukses' cannot be deleted except by admin
+        if (in_array($task->status, ['proses', 'sukses']) && $user->role !== 'admin') {
+            return redirect()->back()->with('error', 'Tugas yang sedang dalam proses atau selesai hanya dapat dihapus oleh admin.');
+        }
+
+        // Check permissions: admin can delete anything, reporter can delete their own task
+        if ($user->role === 'admin' || ($user->role !== 'anak_pkl' && $task->reporter_id === $user->id)) {
+            // Delete photo if exists
+            if ($task->proof_photo) {
+                \Storage::disk('public')->delete($task->proof_photo);
+            }
+            $task->delete();
+            return redirect()->back()->with('success', 'Tugas berhasil dihapus.');
+        }
+
+        return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menghapus tugas ini.');
+    }
+}
