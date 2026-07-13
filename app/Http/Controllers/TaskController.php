@@ -18,6 +18,9 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'quota' => 'required|integer|min:1',
+            'requester_name' => 'required|string|max:255',
+            'target_room' => 'required|string|max:255',
+            'campus_type' => 'required|string|in:Kampus 1,Kampus 2',
         ]);
 
         $user = auth()->user();
@@ -31,6 +34,9 @@ class TaskController extends Controller
             'reporter_id' => $user->id,
             'quota' => $request->quota,
             'status' => 'pending',
+            'requester_name' => $request->requester_name,
+            'target_room' => $request->target_room,
+            'campus_type' => $request->campus_type,
         ]);
 
         return redirect()->back()->with('success', 'Tugas berhasil dilaporkan.');
@@ -196,7 +202,23 @@ class TaskController extends Controller
      */
     public function publicCreate()
     {
-        return \Inertia\Inertia::render('Tasks/PublicCreate');
+        $today = now()->toDateString();
+        $totalStudentsCount = User::where('role', 'anak_pkl')->count();
+        $absentPermitsCount = \App\Models\Permission::where('date', $today)
+            ->where('type', 'tidak_masuk')
+            ->where('status', 'approved')
+            ->count();
+        $activeStudentsCount = \DB::table('task_user')
+            ->join('tasks', 'task_user.task_id', '=', 'tasks.id')
+            ->whereIn('tasks.status', ['pending', 'proses'])
+            ->distinct('task_user.user_id')
+            ->count('task_user.user_id');
+
+        $availableStudents = max(0, $totalStudentsCount - $absentPermitsCount - $activeStudentsCount);
+
+        return \Inertia\Inertia::render('Tasks/PublicCreate', [
+            'availableStudentsCount' => $availableStudents,
+        ]);
     }
 
     /**

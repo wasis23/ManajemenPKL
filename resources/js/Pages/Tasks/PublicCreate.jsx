@@ -2,7 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import React from 'react';
 import { Compass, ArrowLeft, Send, MapPin, Building, User, FileText, ClipboardList } from 'lucide-react';
 
-export default function PublicCreate() {
+export default function PublicCreate({ availableStudentsCount }) {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         description: '',
@@ -53,13 +53,18 @@ export default function PublicCreate() {
                     </div>
 
                     <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 backdrop-blur-md">
-                        <div className="border-b border-slate-800 pb-5">
-                            <h2 className="text-2xl font-black text-white bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">
-                                Form Pengajuan Tugas / Laporan Baru
-                            </h2>
-                            <p className="text-sm text-slate-400 mt-2">
-                                Laporkan masalah teknis atau ajukan tugas baru untuk dikerjakan langsung oleh para siswa magang (PKL). Tidak perlu masuk akun.
-                            </p>
+                        <div className="border-b border-slate-800 pb-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div>
+                                <h2 className="text-2xl font-black text-white bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">
+                                    Form Pengajuan Tugas / Laporan Baru
+                                </h2>
+                                <p className="text-sm text-slate-400 mt-2">
+                                    Laporkan masalah teknis atau ajukan tugas baru untuk dikerjakan langsung oleh para siswa magang (PKL). Tidak perlu masuk akun.
+                                </p>
+                            </div>
+                            <div className="px-4 py-2 bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-bold rounded-xl shrink-0 self-start md:self-center">
+                                Siswa PKL Tersedia: {availableStudentsCount} orang
+                            </div>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">

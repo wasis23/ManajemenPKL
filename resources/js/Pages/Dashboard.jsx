@@ -401,7 +401,10 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
     const taskForm = useForm({
         title: '',
         description: '',
-        quota: 1
+        quota: 1,
+        requester_name: user ? user.name : '',
+        target_room: '',
+        campus_type: 'Kampus 1'
     });
 
     const completeForm = useForm({
@@ -424,7 +427,11 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         email: '',
         password: '',
         role: 'anak_pkl',
-        school_name: ''
+        school_name: '',
+        whatsapp_number: '',
+        address: '',
+        date_of_birth: '',
+        social_media: ''
     });
 
     const pointsForm = useForm({
@@ -436,7 +443,11 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         email: '',
         password: '',
         role: 'anak_pkl',
-        school_name: ''
+        school_name: '',
+        whatsapp_number: '',
+        address: '',
+        date_of_birth: '',
+        social_media: ''
     });
 
     // Handle Flash Notifications
@@ -633,7 +644,11 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
             email: u.email,
             password: '',
             role: u.role,
-            school_name: u.school_name || ''
+            school_name: u.school_name || '',
+            whatsapp_number: u.whatsapp_number || '',
+            address: u.address || '',
+            date_of_birth: u.date_of_birth || '',
+            social_media: u.social_media || ''
         });
     };
 
@@ -1437,6 +1452,48 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                             <form onSubmit={createReportedTask} className="space-y-4">
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Pengaju</label>
+                                                        <input
+                                                            type="text"
+                                                            value={taskForm.data.requester_name}
+                                                            onChange={e => taskForm.setData('requester_name', e.target.value)}
+                                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            placeholder="Nama lengkap pengaju..."
+                                                            required
+                                                        />
+                                                        {taskForm.errors.requester_name && <p className="text-xs text-rose-500 mt-1">{taskForm.errors.requester_name}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Ruangan Dituju</label>
+                                                        <input
+                                                            type="text"
+                                                            value={taskForm.data.target_room}
+                                                            onChange={e => taskForm.setData('target_room', e.target.value)}
+                                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            placeholder="Contoh: Lab Komputer 3..."
+                                                            required
+                                                        />
+                                                        {taskForm.errors.target_room && <p className="text-xs text-rose-500 mt-1">{taskForm.errors.target_room}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Lokasi Kampus</label>
+                                                        <select
+                                                            value={taskForm.data.campus_type}
+                                                            onChange={e => taskForm.setData('campus_type', e.target.value)}
+                                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            required
+                                                        >
+                                                            <option value="Kampus 1">Kampus 1</option>
+                                                            <option value="Kampus 2">Kampus 2</option>
+                                                        </select>
+                                                        {taskForm.errors.campus_type && <p className="text-xs text-rose-500 mt-1">{taskForm.errors.campus_type}</p>}
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                     <div className="md:col-span-2">
                                                         <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Judul Laporan / Masalah</label>
                                                         <input
@@ -1775,16 +1832,60 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                             </select>
                                                         </div>
                                                         {userForm.data.role === 'anak_pkl' && (
-                                                            <div className="sm:col-span-2">
-                                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Sekolah</label>
-                                                                <input
-                                                                    type="text"
-                                                                    value={userForm.data.school_name}
-                                                                    onChange={e => userForm.setData('school_name', e.target.value)}
-                                                                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
-                                                                    required
-                                                                />
-                                                            </div>
+                                                            <>
+                                                                <div className="sm:col-span-2">
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Sekolah</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={userForm.data.school_name}
+                                                                        onChange={e => userForm.setData('school_name', e.target.value)}
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. WhatsApp</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={userForm.data.whatsapp_number}
+                                                                        onChange={e => userForm.setData('whatsapp_number', e.target.value)}
+                                                                        placeholder="Contoh: 081234567890"
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tanggal Lahir</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        value={userForm.data.date_of_birth}
+                                                                        onChange={e => userForm.setData('date_of_birth', e.target.value)}
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                                <div className="sm:col-span-2">
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Alamat Lengkap</label>
+                                                                    <textarea
+                                                                        value={userForm.data.address}
+                                                                        onChange={e => userForm.setData('address', e.target.value)}
+                                                                        placeholder="Masukkan alamat domisili saat ini"
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                        required
+                                                                        rows="2"
+                                                                    />
+                                                                </div>
+                                                                <div className="sm:col-span-2">
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Akun Media Sosial (Opsional)</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={userForm.data.social_media}
+                                                                        onChange={e => userForm.setData('social_media', e.target.value)}
+                                                                        placeholder="Contoh: @instagram_handle"
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                    />
+                                                                </div>
+                                                            </>
                                                         )}
                                                         <div className="sm:col-span-2 flex justify-end gap-2 pt-2">
                                                             <button
@@ -1892,16 +1993,60 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                              </select>
                                                          </div>
                                                          {editUserForm.data.role === 'anak_pkl' && (
-                                                             <div className="sm:col-span-2">
-                                                                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Sekolah</label>
-                                                                 <input
-                                                                     type="text"
-                                                                     value={editUserForm.data.school_name}
-                                                                     onChange={e => editUserForm.setData('school_name', e.target.value)}
-                                                                     className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
-                                                                     required
-                                                                 />
-                                                             </div>
+                                                             <>
+                                                                 <div className="sm:col-span-2">
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Sekolah</label>
+                                                                     <input
+                                                                         type="text"
+                                                                         value={editUserForm.data.school_name}
+                                                                         onChange={e => editUserForm.setData('school_name', e.target.value)}
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                         required
+                                                                     />
+                                                                 </div>
+                                                                 <div>
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. WhatsApp</label>
+                                                                     <input
+                                                                         type="text"
+                                                                         value={editUserForm.data.whatsapp_number}
+                                                                         onChange={e => editUserForm.setData('whatsapp_number', e.target.value)}
+                                                                         placeholder="Contoh: 081234567890"
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                         required
+                                                                     />
+                                                                 </div>
+                                                                 <div>
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tanggal Lahir</label>
+                                                                     <input
+                                                                         type="date"
+                                                                         value={editUserForm.data.date_of_birth}
+                                                                         onChange={e => editUserForm.setData('date_of_birth', e.target.value)}
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                         required
+                                                                     />
+                                                                 </div>
+                                                                 <div className="sm:col-span-2">
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Alamat Lengkap</label>
+                                                                     <textarea
+                                                                         value={editUserForm.data.address}
+                                                                         onChange={e => editUserForm.setData('address', e.target.value)}
+                                                                         placeholder="Masukkan alamat domisili saat ini"
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                         required
+                                                                         rows="2"
+                                                                     />
+                                                                 </div>
+                                                                 <div className="sm:col-span-2">
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Akun Media Sosial (Opsional)</label>
+                                                                     <input
+                                                                         type="text"
+                                                                         value={editUserForm.data.social_media}
+                                                                         onChange={e => editUserForm.setData('social_media', e.target.value)}
+                                                                         placeholder="Contoh: @instagram_handle"
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                     />
+                                                                 </div>
+                                                             </>
                                                          )}
                                                          <div className="sm:col-span-2 flex justify-end gap-2 pt-2">
                                                              <button
@@ -1939,7 +2084,16 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         {/* Students list */}
                                                         {tasks.students?.map((u) => (
                                                             <tr key={u.id} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                                                <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{u.name}</td>
+                                                                <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">
+                                                                    <div>{u.name}</div>
+                                                                    <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mt-1 space-y-0.5">
+                                                                        {u.school_name && <div>Sekolah: {u.school_name}</div>}
+                                                                        {u.whatsapp_number && <div>WhatsApp: {u.whatsapp_number}</div>}
+                                                                        {u.address && <div className="line-clamp-2">Alamat: {u.address}</div>}
+                                                                        {u.date_of_birth && <div>Lahir: {u.date_of_birth}</div>}
+                                                                        {u.social_media && <div>Sosmed: {u.social_media}</div>}
+                                                                    </div>
+                                                                </td>
                                                                 <td className="px-6 py-4 text-xs">{u.email}</td>
                                                                 <td className="px-6 py-4">
                                                                     <span className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase">

@@ -22,6 +22,10 @@ class UserController extends Controller
 
         if ($request->role === 'anak_pkl') {
             $rules['school_name'] = 'required|string|max:255';
+            $rules['whatsapp_number'] = 'required|string|max:255';
+            $rules['address'] = 'required|string';
+            $rules['date_of_birth'] = 'required|date';
+            $rules['social_media'] = 'nullable|string|max:255';
         }
 
         $request->validate($rules);
@@ -36,6 +40,10 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'school_name' => $request->role === 'anak_pkl' ? $request->school_name : null,
+            'whatsapp_number' => $request->role === 'anak_pkl' ? $request->whatsapp_number : null,
+            'address' => $request->role === 'anak_pkl' ? $request->address : null,
+            'date_of_birth' => $request->role === 'anak_pkl' ? $request->date_of_birth : null,
+            'social_media' => $request->role === 'anak_pkl' ? $request->social_media : null,
         ]);
 
         return redirect()->back()->with('success', 'Akun pengguna berhasil dibuat.');
@@ -59,6 +67,10 @@ class UserController extends Controller
 
         if ($request->role === 'anak_pkl') {
             $rules['school_name'] = 'required|string|max:255';
+            $rules['whatsapp_number'] = 'required|string|max:255';
+            $rules['address'] = 'required|string';
+            $rules['date_of_birth'] = 'required|date';
+            $rules['social_media'] = 'nullable|string|max:255';
         }
 
         $request->validate($rules);
@@ -75,8 +87,16 @@ class UserController extends Controller
 
         if ($request->role === 'anak_pkl') {
             $data['school_name'] = $request->school_name;
+            $data['whatsapp_number'] = $request->whatsapp_number;
+            $data['address'] = $request->address;
+            $data['date_of_birth'] = $request->date_of_birth;
+            $data['social_media'] = $request->social_media;
         } else {
             $data['school_name'] = null;
+            $data['whatsapp_number'] = null;
+            $data['address'] = null;
+            $data['date_of_birth'] = null;
+            $data['social_media'] = null;
         }
 
         $user->update($data);
