@@ -58,3 +58,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/storage/{filename}', function ($filename) {
+    $path = storage_path('app/public/' . $filename);
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path);
+})->where('filename', '.*');
+
+Route::get('/run-storage-link', function () {
+    try {
+        Illuminate\Support\Facades\Artisan::call('storage:link');
+        return 'Storage link created successfully!';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
