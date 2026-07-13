@@ -10,6 +10,10 @@ export default function Register() {
         name: '',
         email: '',
         school_name: '',
+        whatsapp_number: '',
+        address: '',
+        date_of_birth: '',
+        social_media: '',
         password: '',
         password_confirmation: '',
     });
@@ -24,11 +28,11 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Register" />
+            <Head title="Daftar Akun PKL" />
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                    <InputLabel htmlFor="name" value="Nama Lengkap" />
 
                     <TextInput
                         id="name"
@@ -78,6 +82,70 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
+                    <InputLabel htmlFor="whatsapp_number" value="No. WhatsApp" />
+
+                    <TextInput
+                        id="whatsapp_number"
+                        name="whatsapp_number"
+                        value={data.whatsapp_number}
+                        className="mt-1 block w-full"
+                        placeholder="Contoh: 081234567890"
+                        onChange={(e) => setData('whatsapp_number', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={errors.whatsapp_number} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="address" value="Alamat Lengkap" />
+
+                    <textarea
+                        id="address"
+                        name="address"
+                        value={data.address}
+                        className="mt-1 block w-full border-gray-300 dark:border-gray-750 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                        placeholder="Masukkan alamat domisili saat ini"
+                        onChange={(e) => setData('address', e.target.value)}
+                        required
+                        rows="3"
+                    />
+
+                    <InputError message={errors.address} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="date_of_birth" value="Tanggal Lahir" />
+
+                    <TextInput
+                        id="date_of_birth"
+                        type="date"
+                        name="date_of_birth"
+                        value={data.date_of_birth}
+                        className="mt-1 block w-full"
+                        onChange={(e) => setData('date_of_birth', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={errors.date_of_birth} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="social_media" value="Akun Media Sosial (Opsional)" />
+
+                    <TextInput
+                        id="social_media"
+                        name="social_media"
+                        value={data.social_media}
+                        className="mt-1 block w-full"
+                        placeholder="Contoh: @instagram_handle / linkedin_url"
+                        onChange={(e) => setData('social_media', e.target.value)}
+                    />
+
+                    <InputError message={errors.social_media} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
                     <InputLabel htmlFor="password" value="Password" />
 
                     <TextInput
@@ -97,7 +165,7 @@ export default function Register() {
                 <div className="mt-4">
                     <InputLabel
                         htmlFor="password_confirmation"
-                        value="Confirm Password"
+                        value="Konfirmasi Password"
                     />
 
                     <TextInput
@@ -119,16 +187,16 @@ export default function Register() {
                     />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
+                <div className="mt-6 flex items-center justify-end">
                     <Link
                         href={route('login')}
                         className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                     >
-                        Already registered?
+                        Sudah punya akun? Masuk
                     </Link>
 
                     <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
+                        Daftar PKL
                     </PrimaryButton>
                 </div>
             </form>
