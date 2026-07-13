@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Task;
 use App\Models\Attendance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class MultiCampusAndToleranceTest extends TestCase
@@ -72,9 +74,11 @@ class MultiCampusAndToleranceTest extends TestCase
         // Mock current time to be 08:30:00 (within 60 minutes of 08:00:00 start time)
         $this->travelTo(now()->setDate(2026, 7, 12)->setTime(8, 30, 0));
 
+        Storage::fake('public');
         $response = $this->actingAs($student)->post(route('attendance.check-in'), [
             'latitude' => -7.5619,
             'longitude' => 110.8540,
+            'selfie' => UploadedFile::fake()->image('selfie.jpg'),
         ]);
 
         $response->assertRedirect();
@@ -105,10 +109,12 @@ class MultiCampusAndToleranceTest extends TestCase
         // Mock current time to be 07:30:00 (before work_hour_start)
         $this->travelTo(now()->setDate(2026, 7, 12)->setTime(7, 30, 0));
 
+        Storage::fake('public');
         // 1. Check in
         $responseCheckIn = $this->actingAs($student)->post(route('attendance.check-in'), [
             'latitude' => -7.5619,
             'longitude' => 110.8540,
+            'selfie' => UploadedFile::fake()->image('selfie.jpg'),
         ]);
         $responseCheckIn->assertRedirect();
 
@@ -120,6 +126,7 @@ class MultiCampusAndToleranceTest extends TestCase
         $responseCheckOut = $this->actingAs($student)->post(route('attendance.check-out'), [
             'latitude' => -7.5619,
             'longitude' => 110.8540,
+            'selfie' => UploadedFile::fake()->image('selfie.jpg'),
         ]);
         $responseCheckOut->assertRedirect();
 
@@ -149,10 +156,12 @@ class MultiCampusAndToleranceTest extends TestCase
         // Mock current time to be 07:30:00 (before work_hour_start)
         $this->travelTo(now()->setDate(2026, 7, 12)->setTime(7, 30, 0));
 
+        Storage::fake('public');
         // 1. Check in
         $responseCheckIn = $this->actingAs($student)->post(route('attendance.check-in'), [
             'latitude' => -7.5619,
             'longitude' => 110.8540,
+            'selfie' => UploadedFile::fake()->image('selfie.jpg'),
         ]);
         $responseCheckIn->assertRedirect();
 

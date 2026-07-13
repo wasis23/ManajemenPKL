@@ -172,6 +172,118 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
     // Inertia Forms
     const [attendanceProcessing, setAttendanceProcessing] = useState(false);
 
+    // Camera States for Selfie Attendance
+    const [showCameraModal, setShowCameraModal] = useState(false);
+    const [attendanceType, setAttendanceType] = useState(''); // 'check-in' or 'check-out'
+    const [cameraStream, setCameraStream] = useState(null);
+    const [capturedSelfie, setCapturedSelfie] = useState(null);
+    const [selfieBlob, setSelfieBlob] = useState(null);
+    const [cameraError, setCameraError] = useState(null);
+    const videoRef = React.useRef(null);
+
+    const startCamera = async () => {
+        setCameraError(null);
+        setCapturedSelfie(null);
+        setSelfieBlob(null);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user' }
+            });
+            setCameraStream(stream);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (err) {
+            console.error("Camera access error:", err);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true
+                });
+                setCameraStream(stream);
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            } catch (fallbackErr) {
+                setCameraError("Gagal mengakses kamera depan. Pastikan izin kamera diberikan.");
+            }
+        }
+    };
+
+    const stopCamera = () => {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            setCameraStream(null);
+        }
+    };
+
+    const capturePhoto = () => {
+        if (!videoRef.current) return;
+        const video = videoRef.current;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        canvas.toBlob((blob) => {
+            if (blob) {
+                setSelfieBlob(blob);
+                setCapturedSelfie(URL.createObjectURL(blob));
+                stopCamera();
+            }
+        }, 'image/jpeg', 0.85);
+    };
+
+    const closeCameraModal = () => {
+        stopCamera();
+        setShowCameraModal(false);
+        setCapturedSelfie(null);
+        setSelfieBlob(null);
+        setCameraError(null);
+    };
+
+    const openCamera = (type) => {
+        setAttendanceType(type);
+        setShowCameraModal(true);
+        setTimeout(() => {
+            startCamera();
+        }, 100);
+    };
+
+    const submitAttendanceWithSelfie = () => {
+        if (!clientCoords || !selfieBlob) return;
+
+        setAttendanceProcessing(true);
+        const url = route(attendanceType === 'check-in' ? 'attendance.check-in' : 'attendance.check-out');
+        const selfieFile = new File([selfieBlob], `selfie_${Date.now()}.jpg`, { type: 'image/jpeg' });
+
+        router.post(url, {
+            latitude: clientCoords.lat,
+            longitude: clientCoords.lng,
+            selfie: selfieFile
+        }, {
+            forceFormData: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setAttendanceProcessing(false);
+                closeCameraModal();
+                scanGps();
+            }
+        });
+    };
+
+    useEffect(() => {
+        return () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [cameraStream]);
+
     const dist1 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude), parseFloat(settings.longitude)) : null;
     const dist2 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude_2 || settings.latitude), parseFloat(settings.longitude_2 || settings.longitude)) : null;
     const closerCampusName = (dist1 !== null && dist2 !== null) ? (dist1 <= dist2 ? 'Kampus 1' : 'Kampus 2') : 'Kampus';
@@ -857,94 +969,122 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                             Pindai Ulang
                                                         </button>
 
-                                                        {/* Check-In / Check-Out Actions */}
-                                                        {todayAttendance?.check_out ? (
-                                                            <div className="flex-1 py-3 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl text-sm text-center">
-                                                                Sudah Menyelesaikan Absensi Hari Ini
-                                                            </div>
-                                                        ) : (!todayAttendance?.check_in && !isPastWorkHourEnd()) ? (
-                                                            <form onSubmit={submitCheckIn} className="flex-1">
-                                                                <button
-                                                                    type="submit"
-                                                                    disabled={cannotCheckIn()}
-                                                                    className={`w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                                                                        cannotCheckIn()
-                                                                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                                                                            : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md shadow-indigo-200 dark:shadow-none'
-                                                                    }`}
-                                                                >
-                                                                    <Check className="w-4 h-4" />
-                                                                    Absen Masuk
-                                                                </button>
-                                                            </form>
-                                                        ) : (
-                                                            <form onSubmit={submitCheckOut} className="flex-1">
-                                                                <button
-                                                                    type="submit"
-                                                                    disabled={cannotCheckOut()}
-                                                                    className={`w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                                                                        cannotCheckOut()
-                                                                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                                                                            : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md'
-                                                                    }`}
-                                                                >
-                                                                    <ArrowRight className="w-4 h-4" />
-                                                                    Absen Pulang
-                                                                </button>
-                                                            </form>
-                                                        )}
+                                                         {/* Check-In / Check-Out Actions */}
+                                                         {todayAttendance?.check_out ? (
+                                                             <div className="flex-1 py-3 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl text-sm text-center">
+                                                                 Sudah Menyelesaikan Absensi Hari Ini
+                                                             </div>
+                                                         ) : (!todayAttendance?.check_in && !isPastWorkHourEnd()) ? (
+                                                             <div className="flex-1">
+                                                                 <button
+                                                                     type="button"
+                                                                     onClick={() => openCamera('check-in')}
+                                                                     disabled={cannotCheckIn()}
+                                                                     className={`w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                                                                         cannotCheckIn()
+                                                                             ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                                                             : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md shadow-indigo-200 dark:shadow-none'
+                                                                     }`}
+                                                                 >
+                                                                     <Check className="w-4 h-4" />
+                                                                     Absen Masuk
+                                                                 </button>
+                                                             </div>
+                                                         ) : (
+                                                             <div className="flex-1">
+                                                                 <button
+                                                                     type="button"
+                                                                     onClick={() => openCamera('check-out')}
+                                                                     disabled={cannotCheckOut()}
+                                                                     className={`w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                                                                         cannotCheckOut()
+                                                                             ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                                                             : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-md'
+                                                                     }`}
+                                                                 >
+                                                                     <ArrowRight className="w-4 h-4" />
+                                                                     Absen Pulang
+                                                                 </button>
+                                                             </div>
+                                                         )}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Today's Log Card */}
-                                            <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
-                                                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-wider">
-                                                    Status Log Absensi Hari Ini
-                                                </h4>
-                                                
-                                                {todayAttendance ? (
-                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                                        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center gap-3">
-                                                            <Clock className="w-8 h-8 text-indigo-500 bg-indigo-50 dark:bg-indigo-950 p-1.5 rounded-lg" />
-                                                            <div>
-                                                                <p className="text-xs text-gray-400">Jam Masuk</p>
-                                                                <p className="text-sm font-bold text-gray-700 dark:text-white mt-0.5">{todayAttendance.check_in || '--:--'}</p>
-                                                            </div>
-                                                        </div>
+                                             {/* Today's Log Card */}
+                                             <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
+                                                 <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 uppercase tracking-wider">
+                                                     Status Log Absensi Hari Ini
+                                                 </h4>
+                                                 
+                                                 {todayAttendance ? (
+                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                                         <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center justify-between gap-3">
+                                                             <div className="flex items-center gap-3">
+                                                                 <Clock className="w-8 h-8 text-indigo-500 bg-indigo-50 dark:bg-indigo-950 p-1.5 rounded-lg" />
+                                                                 <div>
+                                                                     <p className="text-xs text-gray-400">Jam Masuk</p>
+                                                                     <p className="text-sm font-bold text-gray-700 dark:text-white mt-0.5">{todayAttendance.check_in || '--:--'}</p>
+                                                                 </div>
+                                                             </div>
+                                                             {todayAttendance.in_selfie && (
+                                                                 <button 
+                                                                     onClick={() => setShowProofModal(`/storage/${todayAttendance.in_selfie}`)}
+                                                                     className="group relative rounded-lg overflow-hidden w-10 h-10 border border-gray-200 dark:border-gray-700 shadow-sm hover:scale-105 transition-transform shrink-0"
+                                                                 >
+                                                                     <img src={`/storage/${todayAttendance.in_selfie}`} className="w-full h-full object-cover" alt="Selfie Masuk" />
+                                                                     <div className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                         <Camera className="w-3.5 h-3.5 text-white" />
+                                                                     </div>
+                                                                 </button>
+                                                             )}
+                                                         </div>
 
-                                                        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center gap-3">
-                                                            <Clock className="w-8 h-8 text-amber-500 bg-amber-50 dark:bg-amber-950 p-1.5 rounded-lg" />
-                                                            <div>
-                                                                <p className="text-xs text-gray-400">Jam Pulang</p>
-                                                                <p className="text-sm font-bold text-gray-700 dark:text-white mt-0.5">{todayAttendance.check_out || '--:--'}</p>
-                                                            </div>
-                                                        </div>
+                                                         <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center justify-between gap-3">
+                                                             <div className="flex items-center gap-3">
+                                                                 <Clock className="w-8 h-8 text-amber-500 bg-amber-50 dark:bg-amber-950 p-1.5 rounded-lg" />
+                                                                 <div>
+                                                                     <p className="text-xs text-gray-400">Jam Pulang</p>
+                                                                     <p className="text-sm font-bold text-gray-700 dark:text-white mt-0.5">{todayAttendance.check_out || '--:--'}</p>
+                                                                 </div>
+                                                             </div>
+                                                             {todayAttendance.out_selfie && (
+                                                                 <button 
+                                                                     onClick={() => setShowProofModal(`/storage/${todayAttendance.out_selfie}`)}
+                                                                     className="group relative rounded-lg overflow-hidden w-10 h-10 border border-gray-200 dark:border-gray-700 shadow-sm hover:scale-105 transition-transform shrink-0"
+                                                                 >
+                                                                     <img src={`/storage/${todayAttendance.out_selfie}`} className="w-full h-full object-cover" alt="Selfie Pulang" />
+                                                                     <div className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                         <Camera className="w-3.5 h-3.5 text-white" />
+                                                                     </div>
+                                                                 </button>
+                                                             )}
+                                                         </div>
 
-                                                        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center gap-3">
-                                                            <ShieldAlert className={`w-8 h-8 p-1.5 rounded-lg ${
-                                                                todayAttendance.status === 'present' 
-                                                                    ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950' 
-                                                                    : 'text-rose-500 bg-rose-50 dark:bg-rose-950'
-                                                            }`} />
-                                                            <div>
-                                                                <p className="text-xs text-gray-400">Status Validasi</p>
-                                                                <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full mt-1 ${
-                                                                    todayAttendance.status === 'present'
-                                                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                                                        : 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'
-                                                                }`}>
-                                                                    {todayAttendance.status === 'present' ? 'Tepat Waktu' : 'Terlambat'}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-center text-sm text-gray-500 dark:text-gray-400">
-                                                        Anda belum melakukan absensi hari ini.
-                                                    </div>
-                                                )}
-                                            </div>
+                                                         <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center gap-3">
+                                                             <ShieldAlert className={`w-8 h-8 p-1.5 rounded-lg ${
+                                                                 todayAttendance.status === 'present' 
+                                                                     ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950' 
+                                                                     : 'text-rose-500 bg-rose-50 dark:bg-rose-950'
+                                                             }`} />
+                                                             <div>
+                                                                 <p className="text-xs text-gray-400">Status Validasi</p>
+                                                                 <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full mt-1 ${
+                                                                     todayAttendance.status === 'present'
+                                                                         ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                                         : 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'
+                                                                 }`}>
+                                                                     {todayAttendance.status === 'present' ? 'Tepat Waktu' : 'Terlambat'}
+                                                                 </span>
+                                                             </div>
+                                                         </div>
+                                                     </div>
+                                                 ) : (
+                                                     <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-center text-sm text-gray-500 dark:text-gray-400">
+                                                         Anda belum melakukan absensi hari ini.
+                                                     </div>
+                                                 )}
+                                             </div>
                                         </div>
                                     </div>
                                 )}
@@ -2018,11 +2158,27 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                     <td className="px-6 py-4 font-medium text-gray-700 dark:text-gray-300">
                                                                         {att.date}
                                                                     </td>
-                                                                    <td className="px-6 py-4 font-bold text-indigo-600 dark:text-indigo-400 text-xs">
-                                                                        {att.check_in || '--:--'}
+                                                                    <td className="px-6 py-4 text-xs font-bold">
+                                                                        <div className="text-indigo-600 dark:text-indigo-400">{att.check_in || '--:--'}</div>
+                                                                        {att.in_selfie && (
+                                                                            <button 
+                                                                                onClick={() => setShowProofModal(`/storage/${att.in_selfie}`)}
+                                                                                className="mt-1.5 flex items-center gap-1 text-[10px] text-indigo-500 hover:text-indigo-600 dark:text-indigo-450 hover:underline"
+                                                                            >
+                                                                                <Camera className="w-3.5 h-3.5" /> Lihat Selfie
+                                                                            </button>
+                                                                        )}
                                                                     </td>
-                                                                    <td className="px-6 py-4 font-bold text-amber-600 dark:text-amber-400 text-xs">
-                                                                        {att.check_out || '--:--'}
+                                                                    <td className="px-6 py-4 text-xs font-bold">
+                                                                        <div className="text-amber-600 dark:text-amber-400">{att.check_out || '--:--'}</div>
+                                                                        {att.out_selfie && (
+                                                                            <button 
+                                                                                onClick={() => setShowProofModal(`/storage/${att.out_selfie}`)}
+                                                                                className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-500 hover:text-amber-600 dark:text-amber-450 hover:underline"
+                                                                            >
+                                                                                <Camera className="w-3.5 h-3.5" /> Lihat Selfie
+                                                                            </button>
+                                                                        )}
                                                                     </td>
                                                                     <td className="px-6 py-4">
                                                                         <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full ${
@@ -2474,6 +2630,124 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ================= MODAL: CAMERA CAPTURE SELFIE ================= */}
+            {showCameraModal && (
+                <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="relative bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700">
+                        {/* Modal Header */}
+                        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-indigo-50/50 to-purple-50/20 dark:from-gray-750 dark:to-gray-800 flex justify-between items-center">
+                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Camera className="w-5 h-5 text-indigo-500 animate-pulse" />
+                                Selfie Absen {attendanceType === 'check-in' ? 'Masuk' : 'Pulang'}
+                            </h3>
+                            <button onClick={closeCameraModal} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6 flex flex-col items-center justify-center space-y-6">
+                            {cameraError ? (
+                                <div className="p-4 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-sm font-semibold rounded-xl flex items-start gap-2 w-full">
+                                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                                    <span>{cameraError}</span>
+                                </div>
+                            ) : !capturedSelfie ? (
+                                /* Camera Live Stream */
+                                <div className="relative w-full aspect-[3/4] max-w-xs rounded-2xl overflow-hidden border-4 border-indigo-100 dark:border-gray-700 bg-gray-950 shadow-inner flex items-center justify-center">
+                                    {cameraStream ? (
+                                        <video 
+                                            ref={videoRef} 
+                                            autoPlay 
+                                            playsInline 
+                                            className="w-full h-full object-cover"
+                                            style={{ transform: 'scaleX(-1)' }}
+                                        ></video>
+                                    ) : (
+                                        <div className="flex flex-col items-center space-y-3">
+                                            <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                                            <p className="text-xs text-gray-400 font-semibold">Mengaktifkan kamera...</p>
+                                        </div>
+                                    )}
+                                    {/* Circular Guide Overlay */}
+                                    <div className="absolute inset-0 border-[24px] border-black/45 pointer-events-none flex items-center justify-center">
+                                        <div className="w-4/5 aspect-square rounded-full border-2 border-dashed border-white/60"></div>
+                                    </div>
+                                </div>
+                            ) : (
+                                /* Captured Photo Preview */
+                                <div className="relative w-full aspect-[3/4] max-w-xs rounded-2xl overflow-hidden border-4 border-emerald-500 bg-gray-950 shadow-md">
+                                    <img src={capturedSelfie} className="w-full h-full object-cover" alt="Captured Selfie" />
+                                    <span className="absolute top-3 right-3 bg-emerald-500 text-white rounded-full p-1 shadow-md">
+                                        <Check className="w-4 h-4" />
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Info text */}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 text-center max-w-xs">
+                                {!capturedSelfie 
+                                    ? "Posisikan wajah Anda di tengah lingkaran dan pastikan pencahayaan cukup sebelum mengambil foto."
+                                    : "Foto selfie berhasil diambil! Silakan klik 'Kirim Absensi' untuk menyelesaikan proses absensi."}
+                            </p>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={closeCameraModal}
+                                className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                Batal
+                            </button>
+
+                            {!capturedSelfie ? (
+                                <button
+                                    type="button"
+                                    onClick={capturePhoto}
+                                    disabled={!cameraStream}
+                                    className={`px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md transition-all ${
+                                        !cameraStream
+                                            ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-100 dark:shadow-none'
+                                    }`}
+                                >
+                                    <Camera className="w-4 h-4" /> Ambil Foto
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={startCamera}
+                                        className="px-4 py-2 border border-dashed border-indigo-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-colors"
+                                    >
+                                        Foto Ulang
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={submitAttendanceWithSelfie}
+                                        disabled={attendanceProcessing}
+                                        className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5"
+                                    >
+                                        {attendanceProcessing ? (
+                                            <>
+                                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                Mengirim...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Check className="w-4 h-4" /> Kirim Absensi
+                                            </>
+                                        )}
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

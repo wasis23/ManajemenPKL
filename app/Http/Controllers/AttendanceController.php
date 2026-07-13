@@ -30,7 +30,13 @@ class AttendanceController extends Controller
         $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
+            'selfie' => 'required|image|mimes:jpeg,png,jpg|max:5120',
         ]);
+
+        $selfiePath = null;
+        if ($request->hasFile('selfie')) {
+            $selfiePath = $request->file('selfie')->store('selfies', 'public');
+        }
 
         $user = auth()->user();
         if ($user->role !== 'anak_pkl') {
@@ -116,6 +122,7 @@ class AttendanceController extends Controller
             'check_in' => now()->toTimeString(),
             'in_latitude' => $request->latitude,
             'in_longitude' => $request->longitude,
+            'in_selfie' => $selfiePath,
             'status' => $status,
         ]);
 
@@ -135,7 +142,13 @@ class AttendanceController extends Controller
         $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
+            'selfie' => 'required|image|mimes:jpeg,png,jpg|max:5120',
         ]);
+
+        $selfiePath = null;
+        if ($request->hasFile('selfie')) {
+            $selfiePath = $request->file('selfie')->store('selfies', 'public');
+        }
 
         $user = auth()->user();
         if ($user->role !== 'anak_pkl') {
@@ -229,6 +242,7 @@ class AttendanceController extends Controller
         $attendance->check_out = now()->toTimeString();
         $attendance->out_latitude = $request->latitude;
         $attendance->out_longitude = $request->longitude;
+        $attendance->out_selfie = $selfiePath;
         $attendance->save();
 
         return redirect()->back()->with('success', 'Absen pulang berhasil! Selamat beristirahat.');
