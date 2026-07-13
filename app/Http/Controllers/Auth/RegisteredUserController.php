@@ -36,9 +36,12 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'school_name' => 'required|string|max:255',
+            'major' => 'required|string|max:255',
             'whatsapp_number' => 'required|string|max:20',
             'address' => 'required|string|max:1000',
             'date_of_birth' => 'required|date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'social_media' => 'nullable|string|max:255',
         ]);
 
@@ -47,9 +50,12 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'school_name' => $request->school_name,
+            'major' => $request->major,
             'whatsapp_number' => $request->whatsapp_number,
             'address' => $request->address,
             'date_of_birth' => $request->date_of_birth,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
             'social_media' => $request->social_media,
         ]);
 

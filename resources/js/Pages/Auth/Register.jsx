@@ -10,9 +10,12 @@ export default function Register() {
         name: '',
         email: '',
         school_name: '',
+        major: '',
         whatsapp_number: '',
         address: '',
         date_of_birth: '',
+        start_date: '',
+        end_date: '',
         social_media: '',
         password: '',
         password_confirmation: '',
@@ -82,6 +85,22 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
+                    <InputLabel htmlFor="major" value="Jurusan Sekolah" />
+
+                    <TextInput
+                        id="major"
+                        name="major"
+                        value={data.major}
+                        className="mt-1 block w-full"
+                        placeholder="Contoh: Rekayasa Perangkat Lunak, Multimedia"
+                        onChange={(e) => setData('major', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={errors.major} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
                     <InputLabel htmlFor="whatsapp_number" value="No. WhatsApp" />
 
                     <TextInput
@@ -128,6 +147,38 @@ export default function Register() {
                     />
 
                     <InputError message={errors.date_of_birth} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="start_date" value="Tanggal Mulai PKL" />
+
+                    <TextInput
+                        id="start_date"
+                        type="date"
+                        name="start_date"
+                        value={data.start_date}
+                        className="mt-1 block w-full"
+                        onChange={(e) => setData('start_date', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={errors.start_date} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="end_date" value="Tanggal Selesai PKL" />
+
+                    <TextInput
+                        id="end_date"
+                        type="date"
+                        name="end_date"
+                        value={data.end_date}
+                        className="mt-1 block w-full"
+                        onChange={(e) => setData('end_date', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={errors.end_date} className="mt-2" />
                 </div>
 
                 <div className="mt-4">

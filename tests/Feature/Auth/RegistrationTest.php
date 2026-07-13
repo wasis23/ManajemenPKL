@@ -24,9 +24,12 @@ class RegistrationTest extends TestCase
             'password' => 'password',
             'password_confirmation' => 'password',
             'school_name' => 'SMK Indonusa',
+            'major' => 'Rekayasa Perangkat Lunak',
             'whatsapp_number' => '08123456789',
             'address' => 'Surakarta',
             'date_of_birth' => '2005-05-15',
+            'start_date' => '2026-07-01',
+            'end_date' => '2026-12-31',
             'social_media' => '@test',
         ]);
 

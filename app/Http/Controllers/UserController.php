@@ -22,9 +22,12 @@ class UserController extends Controller
 
         if ($request->role === 'anak_pkl') {
             $rules['school_name'] = 'required|string|max:255';
+            $rules['major'] = 'required|string|max:255';
             $rules['whatsapp_number'] = 'required|string|max:255';
             $rules['address'] = 'required|string';
             $rules['date_of_birth'] = 'required|date';
+            $rules['start_date'] = 'required|date';
+            $rules['end_date'] = 'required|date|after_or_equal:start_date';
             $rules['social_media'] = 'nullable|string|max:255';
         }
 
@@ -40,9 +43,12 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'school_name' => $request->role === 'anak_pkl' ? $request->school_name : null,
+            'major' => $request->role === 'anak_pkl' ? $request->major : null,
             'whatsapp_number' => $request->role === 'anak_pkl' ? $request->whatsapp_number : null,
             'address' => $request->role === 'anak_pkl' ? $request->address : null,
             'date_of_birth' => $request->role === 'anak_pkl' ? $request->date_of_birth : null,
+            'start_date' => $request->role === 'anak_pkl' ? $request->start_date : null,
+            'end_date' => $request->role === 'anak_pkl' ? $request->end_date : null,
             'social_media' => $request->role === 'anak_pkl' ? $request->social_media : null,
         ]);
 
@@ -67,9 +73,12 @@ class UserController extends Controller
 
         if ($request->role === 'anak_pkl') {
             $rules['school_name'] = 'required|string|max:255';
+            $rules['major'] = 'required|string|max:255';
             $rules['whatsapp_number'] = 'required|string|max:255';
             $rules['address'] = 'required|string';
             $rules['date_of_birth'] = 'required|date';
+            $rules['start_date'] = 'required|date';
+            $rules['end_date'] = 'required|date|after_or_equal:start_date';
             $rules['social_media'] = 'nullable|string|max:255';
         }
 
@@ -87,15 +96,21 @@ class UserController extends Controller
 
         if ($request->role === 'anak_pkl') {
             $data['school_name'] = $request->school_name;
+            $data['major'] = $request->major;
             $data['whatsapp_number'] = $request->whatsapp_number;
             $data['address'] = $request->address;
             $data['date_of_birth'] = $request->date_of_birth;
+            $data['start_date'] = $request->start_date;
+            $data['end_date'] = $request->end_date;
             $data['social_media'] = $request->social_media;
         } else {
             $data['school_name'] = null;
+            $data['major'] = null;
             $data['whatsapp_number'] = null;
             $data['address'] = null;
             $data['date_of_birth'] = null;
+            $data['start_date'] = null;
+            $data['end_date'] = null;
             $data['social_media'] = null;
         }
 

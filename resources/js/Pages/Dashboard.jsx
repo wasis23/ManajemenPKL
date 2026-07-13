@@ -428,9 +428,12 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         password: '',
         role: 'anak_pkl',
         school_name: '',
+        major: '',
         whatsapp_number: '',
         address: '',
         date_of_birth: '',
+        start_date: '',
+        end_date: '',
         social_media: ''
     });
 
@@ -444,9 +447,12 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         password: '',
         role: 'anak_pkl',
         school_name: '',
+        major: '',
         whatsapp_number: '',
         address: '',
         date_of_birth: '',
+        start_date: '',
+        end_date: '',
         social_media: ''
     });
 
@@ -645,9 +651,12 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
             password: '',
             role: u.role,
             school_name: u.school_name || '',
+            major: u.major || '',
             whatsapp_number: u.whatsapp_number || '',
             address: u.address || '',
             date_of_birth: u.date_of_birth || '',
+            start_date: u.start_date || '',
+            end_date: u.end_date || '',
             social_media: u.social_media || ''
         });
     };
@@ -1843,6 +1852,17 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                         required
                                                                     />
                                                                 </div>
+                                                                <div className="sm:col-span-2">
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jurusan Sekolah</label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={userForm.data.major}
+                                                                        onChange={e => userForm.setData('major', e.target.value)}
+                                                                        placeholder="Contoh: Rekayasa Perangkat Lunak, Multimedia"
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                        required
+                                                                    />
+                                                                </div>
                                                                 <div>
                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. WhatsApp</label>
                                                                     <input
@@ -1860,6 +1880,26 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                         type="date"
                                                                         value={userForm.data.date_of_birth}
                                                                         onChange={e => userForm.setData('date_of_birth', e.target.value)}
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tanggal Mulai PKL</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        value={userForm.data.start_date}
+                                                                        onChange={e => userForm.setData('start_date', e.target.value)}
+                                                                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tanggal Selesai PKL</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        value={userForm.data.end_date}
+                                                                        onChange={e => userForm.setData('end_date', e.target.value)}
                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
                                                                         required
                                                                     />
@@ -2004,6 +2044,17 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                          required
                                                                      />
                                                                  </div>
+                                                                 <div className="sm:col-span-2">
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jurusan Sekolah</label>
+                                                                     <input
+                                                                         type="text"
+                                                                         value={editUserForm.data.major}
+                                                                         onChange={e => editUserForm.setData('major', e.target.value)}
+                                                                         placeholder="Contoh: Rekayasa Perangkat Lunak, Multimedia"
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                         required
+                                                                     />
+                                                                 </div>
                                                                  <div>
                                                                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. WhatsApp</label>
                                                                      <input
@@ -2021,6 +2072,26 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                          type="date"
                                                                          value={editUserForm.data.date_of_birth}
                                                                          onChange={e => editUserForm.setData('date_of_birth', e.target.value)}
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                         required
+                                                                     />
+                                                                 </div>
+                                                                 <div>
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tanggal Mulai PKL</label>
+                                                                     <input
+                                                                         type="date"
+                                                                         value={editUserForm.data.start_date}
+                                                                         onChange={e => editUserForm.setData('start_date', e.target.value)}
+                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                         required
+                                                                     />
+                                                                 </div>
+                                                                 <div>
+                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tanggal Selesai PKL</label>
+                                                                     <input
+                                                                         type="date"
+                                                                         value={editUserForm.data.end_date}
+                                                                         onChange={e => editUserForm.setData('end_date', e.target.value)}
                                                                          className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
                                                                          required
                                                                      />
@@ -2087,10 +2158,13 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                 <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">
                                                                     <div>{u.name}</div>
                                                                     <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mt-1 space-y-0.5">
-                                                                        {u.school_name && <div>Sekolah: {u.school_name}</div>}
+                                                                        {u.school_name && <div>Sekolah: {u.school_name} {u.major && `(${u.major})`}</div>}
                                                                         {u.whatsapp_number && <div>WhatsApp: {u.whatsapp_number}</div>}
                                                                         {u.address && <div className="line-clamp-2">Alamat: {u.address}</div>}
                                                                         {u.date_of_birth && <div>Lahir: {u.date_of_birth}</div>}
+                                                                        {(u.start_date || u.end_date) && (
+                                                                            <div>Periode: {u.start_date || '?'} s/d {u.end_date || '?'}</div>
+                                                                        )}
                                                                         {u.social_media && <div>Sosmed: {u.social_media}</div>}
                                                                     </div>
                                                                 </td>
