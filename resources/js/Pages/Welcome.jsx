@@ -36,10 +36,10 @@ export default function Welcome({ auth }) {
                                     Masuk
                                 </Link>
                                 <Link
-                                    href={route('register')}
+                                    href={route('tasks.public.create')}
                                     className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-bold border border-slate-700 transition-colors"
                                 >
-                                    Daftar PKL
+                                    Ajukan Tugas Baru
                                 </Link>
                             </>
                         )}
@@ -129,10 +129,10 @@ export default function Welcome({ auth }) {
                                         Masuk ke Portal <ArrowRight className="w-4 h-4" />
                                     </Link>
                                     <Link
-                                        href={route('register')}
+                                        href={route('tasks.public.create')}
                                         className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 border border-slate-700 transition-all hover:scale-[1.02]"
                                     >
-                                        Daftar Akun PKL
+                                        Ajukan Tugas Baru
                                     </Link>
                                 </>
                             )}

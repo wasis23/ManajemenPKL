@@ -21,6 +21,15 @@ class RoleMiddleware
 
         $user = auth()->user();
 
+        if (in_array($user->role, ['dosen', 'staf'])) {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akses login untuk staf dan dosen telah dinonaktifkan.',
+            ]);
+        }
+
         if (!in_array($user->role, $roles)) {
             abort(403, 'Unauthorized action.');
         }

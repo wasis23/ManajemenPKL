@@ -31,6 +31,15 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        if (in_array(Auth::user()->role, ['dosen', 'staf'])) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akses login untuk staf dan dosen telah dinonaktifkan.',
+            ]);
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

@@ -190,4 +190,53 @@ class TaskController extends Controller
 
         return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menghapus tugas ini.');
     }
+
+    /**
+     * Display public page for creating a new task.
+     */
+    public function publicCreate()
+    {
+        return \Inertia\Inertia::render('Tasks/PublicCreate');
+    }
+
+    /**
+     * Store a publicly submitted task.
+     */
+    public function publicStore(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'requester_name' => 'required|string|max:255',
+            'target_room' => 'required|string|max:255',
+            'campus_type' => 'required|string|in:Kampus 1,Kampus 2',
+        ]);
+
+        Task::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'requester_name' => $request->requester_name,
+            'target_room' => $request->target_room,
+            'campus_type' => $request->campus_type,
+            'quota' => 1,
+            'status' => 'pending',
+            'reporter_id' => null, // Publicly submitted task
+        ]);
+
+        return redirect()->route('tasks.public.list')->with('success', 'Tugas aduan baru berhasil diajukan!');
+    }
+
+    /**
+     * Display public page for listing all tasks.
+     */
+    public function publicList()
+    {
+        $tasks = Task::with('students:id,name,school_name')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return \Inertia\Inertia::render('Tasks/PublicList', [
+            'tasks' => $tasks,
+        ]);
+    }
 }

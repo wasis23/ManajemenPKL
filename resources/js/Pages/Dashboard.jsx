@@ -1144,8 +1144,11 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                                             <div className="border-t border-gray-50 dark:border-gray-700 pt-4 mt-4 flex items-center justify-between">
                                                                 <div className="text-xs text-gray-400">
-                                                                    Pelapor: <span className="font-semibold text-gray-600 dark:text-gray-300">{task.reporter?.name}</span>
-                                                                 </div>
+                                                                    Pelapor: <span className="font-semibold text-gray-600 dark:text-gray-300">
+                                                                        {task.reporter ? task.reporter.name : `${task.requester_name} (Umum)`}
+                                                                        {task.target_room && ` | Ruang: ${task.target_room} (${task.campus_type})`}
+                                                                    </span>
+                                                                </div>
                                                                  {hasTaken ? (
                                                                      <span className="px-3 py-1.5 bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-650 flex items-center gap-1">
                                                                          <Check className="w-3.5 h-3.5" /> Sudah Anda Ambil
@@ -1511,7 +1514,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                             <p className="font-bold text-gray-900 dark:text-white">{task.title}</p>
                                                                             <p className="text-xs text-gray-400 truncate max-w-sm mt-0.5">{task.description}</p>
                                                                             <span className="text-[10px] text-indigo-500 mt-1 inline-block">
-                                                                                Dilaporkan oleh: {task.reporter?.name}
+                                                                                Pengaju: {task.reporter ? task.reporter.name : `${task.requester_name} (Umum)`}
+                                                                                {task.target_room && ` | Ruang: ${task.target_room} (${task.campus_type})`}
                                                                             </span>
                                                                         </div>
                                                                     </td>
@@ -1767,8 +1771,6 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                 required
                                                             >
                                                                 <option value="anak_pkl">Anak PKL (Student)</option>
-                                                                <option value="dosen">Dosen</option>
-                                                                <option value="staf">Staf IT / Umum</option>
                                                                 <option value="admin">Administrator</option>
                                                             </select>
                                                         </div>
@@ -1886,8 +1888,6 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                  required
                                                              >
                                                                  <option value="anak_pkl">Anak PKL (Student)</option>
-                                                                 <option value="dosen">Dosen</option>
-                                                                 <option value="staf">Staf IT / Umum</option>
                                                                  <option value="admin">Administrator</option>
                                                              </select>
                                                          </div>

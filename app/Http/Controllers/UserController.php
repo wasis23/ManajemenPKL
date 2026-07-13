@@ -17,7 +17,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
-            'role' => 'required|string|in:admin,dosen,staf,anak_pkl',
+            'role' => 'required|string|in:admin,anak_pkl',
         ];
 
         if ($request->role === 'anak_pkl') {
@@ -53,7 +53,7 @@ class UserController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|string|in:admin,dosen,staf,anak_pkl',
+            'role' => 'required|string|in:admin,anak_pkl',
             'password' => 'nullable|string|min:6',
         ];
 

@@ -20,6 +20,11 @@ Route::get('/', function () {
     ]);
 });
 
+// Public Task Routes (No Login Required)
+Route::get('/tasks/public/create', [TaskController::class, 'publicCreate'])->name('tasks.public.create');
+Route::post('/tasks/public', [TaskController::class, 'publicStore'])->name('tasks.public.store');
+Route::get('/tasks/public', [TaskController::class, 'publicList'])->name('tasks.public.list');
+
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard (Main hub for all roles)
@@ -40,8 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
     });
 
-    // Staff/Lecturer/Admin actions
-    Route::middleware('role:admin,dosen,staf')->group(function () {
+    // Admin task actions
+    Route::middleware('role:admin')->group(function () {
         Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
         Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
     });
