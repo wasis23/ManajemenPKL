@@ -36,10 +36,10 @@ export default function Welcome({ auth }) {
                                     Masuk
                                 </Link>
                                 <Link
-                                    href={route('tasks.public.create')}
+                                    href={route('register')}
                                     className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-bold border border-slate-700 transition-colors"
                                 >
-                                    Ajukan Tugas Baru
+                                    Daftar PKL
                                 </Link>
                             </>
                         )}
@@ -123,16 +123,16 @@ export default function Welcome({ auth }) {
                             ) : (
                                 <>
                                     <Link
-                                        href={route('login')}
+                                        href={route('tasks.public.create')}
                                         className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-900/30 transition-all hover:scale-[1.02]"
                                     >
-                                        Masuk ke Portal <ArrowRight className="w-4 h-4" />
+                                        Ajukan Tugas Baru <ArrowRight className="w-4 h-4" />
                                     </Link>
                                     <Link
-                                        href={route('tasks.public.create')}
+                                        href={route('tasks.public.list')}
                                         className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 border border-slate-700 transition-all hover:scale-[1.02]"
                                     >
-                                        Ajukan Tugas Baru
+                                        Pantau Daftar Tugas
                                     </Link>
                                 </>
                             )}
