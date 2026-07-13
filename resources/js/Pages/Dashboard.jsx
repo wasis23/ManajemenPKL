@@ -277,12 +277,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
     };
 
     useEffect(() => {
+        if (cameraStream && videoRef.current) {
+            videoRef.current.srcObject = cameraStream;
+        }
+    }, [cameraStream]);
+
+    useEffect(() => {
         return () => {
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
             }
         };
-    }, [cameraStream]);
+    }, []);
 
     const dist1 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude), parseFloat(settings.longitude)) : null;
     const dist2 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude_2 || settings.latitude), parseFloat(settings.longitude_2 || settings.longitude)) : null;
