@@ -52,7 +52,15 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                           (att.user?.email || '').toLowerCase().includes(searchStudent.toLowerCase());
         const matchStartDate = filterStartDate ? att.date >= filterStartDate : true;
         const matchEndDate = filterEndDate ? att.date <= filterEndDate : true;
-        const matchStatus = filterStatus === 'all' ? true : att.status === filterStatus;
+        const matchStatus = filterStatus === 'all' 
+            ? true 
+            : (filterStatus === 'present' 
+                ? att.status === 'present' 
+                : (filterStatus === 'rejected' 
+                    ? (att.status === 'rejected' || att.status === 'late') 
+                    : (filterStatus === 'belum_absen' 
+                        ? (att.status === 'belum_absen' || (!att.check_in && att.status !== 'izin_tidak_masuk')) 
+                        : att.status === filterStatus)));
         return matchName && matchStartDate && matchEndDate && matchStatus;
     });
 
@@ -98,7 +106,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                             <th>Tanggal</th>
                             <th>Jam Masuk</th>
                             <th>Jam Pulang</th>
-                            <th>Status Validasi</th>
+                            <th>Status Absen Masuk</th>
+                            <th>Status Absen Pulang</th>
                             <th>Koordinat Masuk</th>
                             <th>Koordinat Keluar</th>
                         </tr>
@@ -107,20 +116,20 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         `;
 
         filteredAttendances.forEach((att, index) => {
-            const statusText = att.status === 'present' 
+            const statusInText = att.check_in 
+                ? (att.status === 'present' ? 'Tepat Waktu' : (att.status === 'late' ? 'Terlambat' : 'Ditolak')) 
+                : (att.status === 'izin_tidak_masuk' ? 'Izin (Tidak Masuk)' : 'Belum Absen');
+            const statusInClass = att.check_in 
+                ? (att.status === 'present' ? 'status-present' : 'status-rejected') 
+                : (att.status === 'izin_tidak_masuk' ? 'status-permit' : 'status-pending');
+
+            const statusOutText = att.check_out 
                 ? 'Tepat Waktu' 
-                : att.status === 'rejected' 
-                    ? 'Terlambat' 
-                    : att.status === 'izin_tidak_masuk'
-                        ? 'Izin (Tidak Masuk)'
-                        : 'Belum Absen';
-            const statusClass = att.status === 'present' 
+                : (att.status === 'izin_tidak_masuk' ? 'Izin (Tidak Masuk)' : 'Belum Absen');
+            const statusOutClass = att.check_out 
                 ? 'status-present' 
-                : att.status === 'rejected' 
-                    ? 'status-rejected' 
-                    : att.status === 'izin_tidak_masuk'
-                        ? 'status-permit'
-                        : 'status-pending';
+                : (att.status === 'izin_tidak_masuk' ? 'status-permit' : 'status-pending');
+
             tableHtml += `
                 <tr>
                     <td>${index + 1}</td>
@@ -129,7 +138,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                     <td>${att.date}</td>
                     <td>${att.check_in || '--:--'}</td>
                     <td>${att.check_out || '--:--'}</td>
-                    <td class="${statusClass}">${statusText}</td>
+                    <td class="${statusInClass}">${statusInText}</td>
+                    <td class="${statusOutClass}">${statusOutText}</td>
                     <td>${att.in_latitude && att.in_longitude ? `${att.in_latitude}, ${att.in_longitude}` : '-'}</td>
                     <td>${att.out_latitude && att.out_longitude ? `${att.out_latitude}, ${att.out_longitude}` : '-'}</td>
                 </tr>
@@ -1069,18 +1079,14 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                                          <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center gap-3">
                                                              <ShieldAlert className={`w-8 h-8 p-1.5 rounded-lg ${
-                                                                 todayAttendance.status === 'present' 
-                                                                     ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950' 
-                                                                     : 'text-rose-500 bg-rose-50 dark:bg-rose-950'
+                                                                 todayAttendance.status === 'present' ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950' : (todayAttendance.status === 'late' ? 'text-amber-500 bg-amber-50 dark:bg-amber-950' : 'text-rose-500 bg-rose-50 dark:bg-rose-950')
                                                              }`} />
                                                              <div>
                                                                  <p className="text-xs text-gray-400">Status Validasi</p>
                                                                  <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full mt-1 ${
-                                                                     todayAttendance.status === 'present'
-                                                                         ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                                                         : 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'
+                                                                     todayAttendance.status === 'present' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : (todayAttendance.status === 'late' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300')
                                                                  }`}>
-                                                                     {todayAttendance.status === 'present' ? 'Tepat Waktu' : 'Terlambat'}
+                                                                     {todayAttendance.status === 'present' ? 'Tepat Waktu' : (todayAttendance.status === 'late' ? 'Terlambat' : 'Ditolak')}
                                                                  </span>
                                                              </div>
                                                          </div>
@@ -2040,7 +2046,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 <div>
                                                     <p className="text-xs text-gray-400 font-semibold">Terlambat</p>
                                                     <p className="text-2xl font-black text-gray-850 dark:text-white mt-0.5">
-                                                        {attendances.filter(a => a.status === 'rejected').length}
+                                                        {attendances.filter(a => a.status === 'rejected' || a.status === 'late').length}
                                                     </p>
                                                 </div>
                                             </div>
@@ -2053,7 +2059,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     <p className="text-xs text-gray-400 font-semibold">Persentase Hadir</p>
                                                     <p className="text-2xl font-black text-gray-850 dark:text-white mt-0.5">
                                                         {attendances.length > 0 
-                                                            ? `${Math.round((attendances.filter(a => a.status === 'present').length / attendances.length) * 100)}%`
+                                                            ? `${Math.round((attendances.filter(a => a.status === 'present' || a.status === 'late').length / attendances.length) * 100)}%`
                                                             : '0%'
                                                         }
                                                     </p>
@@ -2146,7 +2152,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                             <th scope="col" className="px-6 py-3">Tanggal</th>
                                                             <th scope="col" className="px-6 py-3">Absen Masuk</th>
                                                             <th scope="col" className="px-6 py-3">Absen Pulang</th>
-                                                            <th scope="col" className="px-6 py-3">Status</th>
+                                                            <th scope="col" className="px-6 py-3">Status Masuk</th>
+                                                            <th scope="col" className="px-6 py-3">Status Pulang</th>
                                                             <th scope="col" className="px-6 py-3">Koordinat GPS</th>
                                                         </tr>
                                                     </thead>
@@ -2188,23 +2195,47 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                     </td>
                                                                     <td className="px-6 py-4">
                                                                         <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full ${
-                                                                            att.status === 'present'
-                                                                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                                                                : att.status === 'rejected'
-                                                                                    ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'
-                                                                                    : att.status === 'izin_tidak_masuk'
-                                                                                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
-                                                                                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700/60 dark:text-gray-300'
+                                                                            att.check_in
+                                                                                ? (att.status === 'present'
+                                                                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                                                    : (att.status === 'late'
+                                                                                        ? 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'
+                                                                                        : 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300'))
+                                                                                : (att.status === 'izin_tidak_masuk'
+                                                                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                                                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700/60 dark:text-gray-300')
                                                                         }`}>
-                                                                            {att.status === 'present' 
-                                                                                ? 'Tepat Waktu' 
-                                                                                : att.status === 'rejected' 
-                                                                                    ? 'Terlambat' 
-                                                                                    : att.status === 'izin_tidak_masuk'
-                                                                                        ? 'Izin (Tidak Masuk)'
-                                                                                        : 'Belum Absen'}
+                                                                            {att.check_in
+                                                                                ? (att.status === 'present' 
+                                                                                    ? 'Tepat Waktu' 
+                                                                                    : (att.status === 'late' 
+                                                                                        ? 'Terlambat' 
+                                                                                        : 'Ditolak'))
+                                                                                : (att.status === 'izin_tidak_masuk'
+                                                                                    ? 'Izin (Tidak Masuk)'
+                                                                                    : 'Belum Absen')}
                                                                         </span>
-                                                                        {att.permit && (
+                                                                        {att.permit && (att.permit.type === 'masuk_terlambat' || att.permit.type === 'tidak_masuk') && (
+                                                                            <div className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 mt-1 uppercase">
+                                                                                Izin: {att.permit.type.replace('_', ' ')}
+                                                                            </div>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-6 py-4">
+                                                                        <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full ${
+                                                                            att.check_out
+                                                                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                                                : (att.status === 'izin_tidak_masuk'
+                                                                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                                                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700/60 dark:text-gray-300')
+                                                                        }`}>
+                                                                            {att.check_out
+                                                                                ? 'Tepat Waktu' 
+                                                                                : (att.status === 'izin_tidak_masuk'
+                                                                                    ? 'Izin (Tidak Masuk)'
+                                                                                    : 'Belum Absen')}
+                                                                        </span>
+                                                                        {att.permit && (att.permit.type === 'pulang_cepat' || att.permit.type === 'tidak_masuk') && (
                                                                             <div className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 mt-1 uppercase">
                                                                                 Izin: {att.permit.type.replace('_', ' ')}
                                                                             </div>
