@@ -18,6 +18,8 @@ export default function UpdateProfileInformation({
             name: user.name,
             email: user.email,
             school_name: user.school_name || '',
+            start_date: user.start_date || '',
+            end_date: user.end_date || '',
         });
 
     const submit = (e) => {
@@ -72,29 +74,61 @@ export default function UpdateProfileInformation({
                 </div>
 
                 {user.role === 'anak_pkl' && (
-                    <div>
-                        <InputLabel htmlFor="school_name" value="Nama Sekolah" />
+                    <>
+                        <div>
+                            <InputLabel htmlFor="school_name" value="Nama Sekolah" />
 
-                        <select
-                            id="school_name"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
-                            value={data.school_name}
-                            onChange={(e) => setData('school_name', e.target.value)}
-                            required
-                        >
-                            <option value="">Pilih Sekolah</option>
-                            {schools.map((school) => (
-                                <option key={school.id} value={school.name}>
-                                    {school.name}
-                                </option>
-                            ))}
-                            {data.school_name && !schools.some(s => s.name === data.school_name) && (
-                                <option value={data.school_name}>{data.school_name}</option>
-                            )}
-                        </select>
+                            <select
+                                id="school_name"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                value={data.school_name}
+                                onChange={(e) => setData('school_name', e.target.value)}
+                                required
+                            >
+                                <option value="">Pilih Sekolah</option>
+                                {schools.map((school) => (
+                                    <option key={school.id} value={school.name}>
+                                        {school.name}
+                                    </option>
+                                ))}
+                                {data.school_name && !schools.some(s => s.name === data.school_name) && (
+                                    <option value={data.school_name}>{data.school_name}</option>
+                                )}
+                            </select>
 
-                        <InputError className="mt-2" message={errors.school_name} />
-                    </div>
+                            <InputError className="mt-2" message={errors.school_name} />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="start_date" value="Tanggal Mulai PKL" />
+
+                            <TextInput
+                                id="start_date"
+                                type="date"
+                                className="mt-1 block w-full"
+                                value={data.start_date}
+                                onChange={(e) => setData('start_date', e.target.value)}
+                                required
+                            />
+
+                            <InputError className="mt-2" message={errors.start_date} />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="end_date" value="Tanggal Selesai PKL" />
+
+                            <TextInput
+                                id="end_date"
+                                type="date"
+                                className="mt-1 block w-full"
+                                value={data.end_date}
+                                onChange={(e) => setData('end_date', e.target.value)}
+                                required
+                            />
+
+                            <InputError className="mt-2" message={errors.end_date} />
+                        </div>
+                    </>
                 )}
 
                 {mustVerifyEmail && user.email_verified_at === null && (
