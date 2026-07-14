@@ -250,6 +250,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
 
+        if (clientCoords) {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+            
+            ctx.font = "14px Arial";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            const dateStr = new Date().toLocaleString('id-ID');
+            ctx.fillText(`Lat: ${clientCoords.lat.toFixed(6)} | Lng: ${clientCoords.lng.toFixed(6)}`, canvas.width / 2, canvas.height - 25);
+            ctx.fillText(`${dateStr}`, canvas.width / 2, canvas.height - 10);
+        }
+
         canvas.toBlob((blob) => {
             if (blob) {
                 setSelfieBlob(blob);
@@ -310,6 +322,17 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
             }
         };
     }, []);
+
+    // Auto-refresh tasks list every 10 seconds when viewing jobboard
+    useEffect(() => {
+        let interval;
+        if (activeTab === 'jobboard' || activeTab === 'mytasks') {
+            interval = setInterval(() => {
+                router.reload({ only: ['tasks'], preserveScroll: true, preserveState: true });
+            }, 10000);
+        }
+        return () => clearInterval(interval);
+    }, [activeTab]);
 
     const dist1 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude), parseFloat(settings.longitude)) : null;
     const dist2 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude_2 || settings.latitude), parseFloat(settings.longitude_2 || settings.longitude)) : null;
