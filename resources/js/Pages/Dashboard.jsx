@@ -78,6 +78,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         return matchName && matchStartDate && matchEndDate && matchStatus;
     });
 
+    const hasFilters = !!(searchStudent || filterStartDate || filterEndDate || filterStatus !== 'all');
+    const getTodayDateString = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    const statsSource = hasFilters 
+        ? filteredAttendances 
+        : attendances.filter(a => a.date === getTodayDateString());
+
     const exportAttendanceToExcel = () => {
         let tableHtml = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -2812,8 +2824,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     <Clock className="w-6 h-6" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs text-gray-400 font-semibold">Total Absensi</p>
-                                                    <p className="text-2xl font-black text-gray-850 dark:text-white mt-0.5">{attendances.length}</p>
+                                                    <p className="text-xs text-gray-400 font-semibold">Total Absensi {hasFilters ? '(Terfilter)' : '(Hari Ini)'}</p>
+                                                    <p className="text-2xl font-black text-gray-850 dark:text-white mt-0.5">{statsSource.length}</p>
                                                 </div>
                                             </div>
 
@@ -2822,9 +2834,9 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     <CheckCircle className="w-6 h-6" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs text-gray-400 font-semibold">Tepat Waktu</p>
+                                                    <p className="text-xs text-gray-400 font-semibold">Tepat Waktu {hasFilters ? '(Terfilter)' : '(Hari Ini)'}</p>
                                                     <p className="text-2xl font-black text-gray-850 dark:text-white mt-0.5">
-                                                        {attendances.filter(a => a.status === 'present').length}
+                                                        {statsSource.filter(a => a.status === 'present').length}
                                                     </p>
                                                 </div>
                                             </div>
@@ -2834,9 +2846,9 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     <AlertTriangle className="w-6 h-6" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs text-gray-400 font-semibold">Terlambat</p>
+                                                    <p className="text-xs text-gray-400 font-semibold">Terlambat {hasFilters ? '(Terfilter)' : '(Hari Ini)'}</p>
                                                     <p className="text-2xl font-black text-gray-850 dark:text-white mt-0.5">
-                                                        {attendances.filter(a => a.status === 'rejected' || a.status === 'late').length}
+                                                        {statsSource.filter(a => a.status === 'rejected' || a.status === 'late').length}
                                                     </p>
                                                 </div>
                                             </div>
@@ -2846,10 +2858,10 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     <Trophy className="w-6 h-6" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-xs text-gray-400 font-semibold">Persentase Hadir</p>
+                                                    <p className="text-xs text-gray-400 font-semibold">Persentase Hadir {hasFilters ? '(Terfilter)' : '(Hari Ini)'}</p>
                                                     <p className="text-2xl font-black text-gray-850 dark:text-white mt-0.5">
-                                                        {attendances.length > 0 
-                                                            ? `${Math.round((attendances.filter(a => a.status === 'present' || a.status === 'late').length / attendances.length) * 100)}%`
+                                                        {statsSource.length > 0 
+                                                            ? `${Math.round((statsSource.filter(a => a.status === 'present' || a.status === 'late').length / statsSource.length) * 100)}%`
                                                             : '0%'
                                                         }
                                                     </p>
