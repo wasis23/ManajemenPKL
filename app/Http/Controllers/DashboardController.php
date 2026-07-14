@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Models\Permission;
+use App\Models\School;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -189,6 +190,7 @@ class DashboardController extends Controller
             'attendances' => $attendancesList,
             'permissions' => $permissions,
             'availableStudentsCount' => $availableStudentsCount,
+            'schools' => $user->role === 'admin' ? School::orderBy('name', 'asc')->get() : [],
         ]);
     }
 }

@@ -5,7 +5,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Register() {
+export default function Register({ schools = [] }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -71,15 +71,21 @@ export default function Register() {
                 <div className="mt-4">
                     <InputLabel htmlFor="school_name" value="Nama Sekolah" />
 
-                    <TextInput
+                    <select
                         id="school_name"
                         name="school_name"
                         value={data.school_name}
-                        className="mt-1 block w-full"
-                        autoComplete="organization"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                         onChange={(e) => setData('school_name', e.target.value)}
                         required
-                    />
+                    >
+                        <option value="">Pilih Sekolah</option>
+                        {schools.map((school) => (
+                            <option key={school.id} value={school.name}>
+                                {school.name}
+                            </option>
+                        ))}
+                    </select>
 
                     <InputError message={errors.school_name} className="mt-2" />
                 </div>

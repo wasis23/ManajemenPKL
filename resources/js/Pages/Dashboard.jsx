@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   MapPin, Award, ClipboardList, Settings, Users, CheckCircle, AlertTriangle, 
   Clock, Plus, Trash2, Camera, ShieldAlert, AwardIcon, Compass, RefreshCw,
-  Trophy, HelpCircle, UserPlus, Star, ArrowRight, UploadCloud, Check, X, Pencil
+  Trophy, HelpCircle, UserPlus, Star, ArrowRight, UploadCloud, Check, X, Pencil,
+  GraduationCap
 } from 'lucide-react';
 
 // Haversine formula in JS
@@ -19,7 +20,7 @@ function getDistanceJS(lat1, lon1, lat2, lon2) {
     return R * c; // in meters
 }
 
-export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = 0 }) {
+export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = 0, schools = [] }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
 
@@ -456,6 +457,10 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         social_media: ''
     });
 
+    const schoolForm = useForm({
+        name: '',
+    });
+
     // Handle Flash Notifications
     useEffect(() => {
         if (flash.success) {
@@ -680,6 +685,24 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         }
     };
 
+    const createSchool = (e) => {
+        e.preventDefault();
+        schoolForm.post(route('schools.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                schoolForm.reset();
+            }
+        });
+    };
+
+    const deleteSchool = (schoolId) => {
+        if (confirm('Apakah Anda yakin ingin menghapus sekolah ini?')) {
+            router.delete(route('schools.destroy', schoolId), {
+                preserveScroll: true
+            });
+        }
+    };
+
     const handleUpdatePermitStatus = (permitId, status) => {
         router.patch(route('permissions.status.update', permitId), { status }, {
             preserveScroll: true,
@@ -869,6 +892,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         {pendingPermitsCount}
                                                     </span>
                                                 )}
+                                            </button>
+
+                                            <button
+                                                onClick={() => setActiveTab('schools')}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    activeTab === 'schools'
+                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                }`}
+                                            >
+                                                <GraduationCap className="w-5 h-5" />
+                                                Kelola Sekolah
                                             </button>
 
                                             <button
@@ -1644,6 +1679,70 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                 )}
 
 
+                                {/* ================= TAB: SCHOOLS MANAGEMENT (ADMIN ONLY) ================= */}
+                                {activeTab === 'schools' && user.role === 'admin' && (
+                                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
+                                            <GraduationCap className="w-5 h-5 text-indigo-500" />
+                                            Kelola Daftar Sekolah
+                                        </h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                            Tambahkan daftar sekolah yang diperbolehkan untuk mendaftar PKL. Data ini akan muncul sebagai pilihan di formulir pendaftaran dan profil.
+                                        </p>
+
+                                        {/* Form Tambah Sekolah */}
+                                        <form onSubmit={createSchool} className="space-y-4 max-w-xl mb-8">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Sekolah Baru</label>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={schoolForm.data.name}
+                                                        onChange={e => schoolForm.setData('name', e.target.value)}
+                                                        className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                        placeholder="Contoh: SMK Negeri 2 Surakarta..."
+                                                        required
+                                                    />
+                                                    <button
+                                                        type="submit"
+                                                        disabled={schoolForm.processing}
+                                                        className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold flex items-center gap-1.5 shadow-md shadow-indigo-100 dark:shadow-none"
+                                                    >
+                                                        <Plus className="w-4 h-4" /> Tambah
+                                                    </button>
+                                                </div>
+                                                {schoolForm.errors.name && <p className="text-xs text-rose-500 mt-1">{schoolForm.errors.name}</p>}
+                                            </div>
+                                        </form>
+
+                                        {/* Daftar Sekolah */}
+                                        <div className="border-t pt-6 dark:border-gray-700">
+                                            <h4 className="font-bold text-sm text-gray-900 dark:text-white mb-4">Daftar Sekolah Terdaftar ({schools.length})</h4>
+                                            {schools.length > 0 ? (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {schools.map((school) => (
+                                                        <div key={school.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-150 dark:border-gray-800">
+                                                            <span className="text-sm font-medium text-gray-900 dark:text-white">{school.name}</span>
+                                                            <button
+                                                                onClick={() => deleteSchool(school.id)}
+                                                                className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg inline-flex"
+                                                                title="Hapus Sekolah"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-6">
+                                                    Belum ada sekolah terdaftar. Silakan tambahkan sekolah baru di atas.
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+
                                 {/* ================= TAB: GEOFENCE SETTINGS (ADMIN ONLY) ================= */}
                                 {activeTab === 'settings' && user.role === 'admin' && (
                                     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -1844,13 +1943,17 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                             <>
                                                                 <div className="sm:col-span-2">
                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Sekolah</label>
-                                                                    <input
-                                                                        type="text"
+                                                                    <select
                                                                         value={userForm.data.school_name}
                                                                         onChange={e => userForm.setData('school_name', e.target.value)}
                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
                                                                         required
-                                                                    />
+                                                                    >
+                                                                        <option value="">Pilih Sekolah</option>
+                                                                        {schools.map(school => (
+                                                                            <option key={school.id} value={school.name}>{school.name}</option>
+                                                                        ))}
+                                                                    </select>
                                                                 </div>
                                                                 <div className="sm:col-span-2">
                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jurusan Sekolah</label>
@@ -2036,13 +2139,20 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                              <>
                                                                  <div className="sm:col-span-2">
                                                                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Sekolah</label>
-                                                                     <input
-                                                                         type="text"
-                                                                         value={editUserForm.data.school_name}
-                                                                         onChange={e => editUserForm.setData('school_name', e.target.value)}
-                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
-                                                                         required
-                                                                     />
+                                                                     <select
+                                                                          value={editUserForm.data.school_name}
+                                                                          onChange={e => editUserForm.setData('school_name', e.target.value)}
+                                                                          className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                          required
+                                                                      >
+                                                                          <option value="">Pilih Sekolah</option>
+                                                                          {editUserForm.data.school_name && !schools.some(s => s.name === editUserForm.data.school_name) && (
+                                                                              <option value={editUserForm.data.school_name}>{editUserForm.data.school_name}</option>
+                                                                          )}
+                                                                          {schools.map(school => (
+                                                                              <option key={school.id} value={school.name}>{school.name}</option>
+                                                                          ))}
+                                                                      </select>
                                                                  </div>
                                                                  <div className="sm:col-span-2">
                                                                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jurusan Sekolah</label>

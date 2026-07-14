@@ -8,6 +8,7 @@ import { Link, useForm, usePage } from '@inertiajs/react';
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
+    schools = [],
     className = '',
 }) {
     const user = usePage().props.auth.user;
@@ -74,14 +75,23 @@ export default function UpdateProfileInformation({
                     <div>
                         <InputLabel htmlFor="school_name" value="Nama Sekolah" />
 
-                        <TextInput
+                        <select
                             id="school_name"
-                            className="mt-1 block w-full"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                             value={data.school_name}
                             onChange={(e) => setData('school_name', e.target.value)}
                             required
-                            autoComplete="organization"
-                        />
+                        >
+                            <option value="">Pilih Sekolah</option>
+                            {schools.map((school) => (
+                                <option key={school.id} value={school.name}>
+                                    {school.name}
+                                </option>
+                            ))}
+                            {data.school_name && !schools.some(s => s.name === data.school_name) && (
+                                <option value={data.school_name}>{data.school_name}</option>
+                            )}
+                        </select>
 
                         <InputError className="mt-2" message={errors.school_name} />
                     </div>

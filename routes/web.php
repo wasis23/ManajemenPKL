@@ -7,6 +7,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\SchoolController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -54,6 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin-only configurations and user accounts management
     Route::middleware('role:admin')->group(function () {
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::post('/schools', [SchoolController::class, 'store'])->name('schools.store');
+        Route::delete('/schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::patch('/users/{user}/points', [UserController::class, 'updatePoints'])->name('users.points.update');

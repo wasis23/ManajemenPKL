@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
-export default function Edit({ mustVerifyEmail, status }) {
+export default function Edit({ mustVerifyEmail, status, schools }) {
     return (
         <AuthenticatedLayout
             header={
@@ -20,6 +20,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                         <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
                             status={status}
+                            schools={schools}
                             className="max-w-xl"
                         />
                     </div>
