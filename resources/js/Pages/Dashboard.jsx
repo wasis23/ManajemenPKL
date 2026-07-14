@@ -6,6 +6,7 @@ import {
   Clock, Plus, Trash2, Camera, ShieldAlert, AwardIcon, Compass, RefreshCw,
   Trophy, HelpCircle, UserPlus, Star, ArrowRight, UploadCloud, Check, X, Pencil
 } from 'lucide-react';
+import DevicePermissions from '@/Pages/Profile/Partials/DevicePermissions';
 
 // Haversine formula in JS
 function getDistanceJS(lat1, lon1, lat2, lon2) {
@@ -828,6 +829,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 <Clock className="w-5 h-5" />
                                                 Izin & Dispensasi
                                             </button>
+
+                                            <button
+                                                onClick={() => setActiveTab('device_permissions')}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    activeTab === 'device_permissions'
+                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                }`}
+                                            >
+                                                <Settings className="w-5 h-5" />
+                                                Pengaturan Perangkat
+                                            </button>
                                         </>
                                     )}
 
@@ -1378,6 +1391,14 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 </p>
                                             )}
                                         </div>
+                                    </div>
+                                )}
+
+
+                                {/* ================= TAB: DEVICE PERMISSIONS ================= */}
+                                {activeTab === 'device_permissions' && (
+                                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
+                                        <DevicePermissions className="max-w-3xl mx-auto" />
                                     </div>
                                 )}
 
