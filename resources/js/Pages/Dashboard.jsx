@@ -7,6 +7,7 @@ import {
   Trophy, HelpCircle, UserPlus, Star, ArrowRight, UploadCloud, Check, X, Pencil,
   GraduationCap
 } from 'lucide-react';
+import DevicePermissions from '@/Pages/Profile/Partials/DevicePermissions';
 
 // Haversine formula in JS
 function getDistanceJS(lat1, lon1, lat2, lon2) {
@@ -197,8 +198,19 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         setCapturedSelfie(null);
         setSelfieBlob(null);
         try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            let videoConstraints = true;
+            
+            if (videoDevices.length > 1) {
+                videoConstraints = { facingMode: 'user' };
+            } else if (videoDevices.length === 1) {
+                videoConstraints = true;
+            }
+            
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user' }
+                video: videoConstraints
             });
             setCameraStream(stream);
             if (videoRef.current) {
@@ -215,7 +227,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                     videoRef.current.srcObject = stream;
                 }
             } catch (fallbackErr) {
-                setCameraError("Gagal mengakses kamera depan. Pastikan izin kamera diberikan.");
+                setCameraError("Gagal mengakses kamera. Pastikan izin kamera diberikan.");
             }
         }
     };
@@ -239,6 +251,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        if (clientCoords) {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+            
+            ctx.font = "14px Arial";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            const dateStr = new Date().toLocaleString('id-ID');
+            ctx.fillText(`Lat: ${clientCoords.lat.toFixed(6)} | Lng: ${clientCoords.lng.toFixed(6)}`, canvas.width / 2, canvas.height - 25);
+            ctx.fillText(`${dateStr}`, canvas.width / 2, canvas.height - 10);
+        }
 
         canvas.toBlob((blob) => {
             if (blob) {
@@ -300,6 +324,17 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
             }
         };
     }, []);
+
+    // Auto-refresh tasks list every 10 seconds when viewing jobboard
+    useEffect(() => {
+        let interval;
+        if (activeTab === 'jobboard' || activeTab === 'mytasks') {
+            interval = setInterval(() => {
+                router.reload({ only: ['tasks'], preserveScroll: true, preserveState: true });
+            }, 10000);
+        }
+        return () => clearInterval(interval);
+    }, [activeTab]);
 
     const dist1 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude), parseFloat(settings.longitude)) : null;
     const dist2 = (clientCoords && settings) ? getDistanceJS(clientCoords.lat, clientCoords.lng, parseFloat(settings.latitude_2 || settings.latitude), parseFloat(settings.longitude_2 || settings.longitude)) : null;
@@ -816,6 +851,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                             >
                                                 <Clock className="w-5 h-5" />
                                                 Izin & Dispensasi
+                                            </button>
+
+                                            <button
+                                                onClick={() => setActiveTab('device_permissions')}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    activeTab === 'device_permissions'
+                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                }`}
+                                            >
+                                                <Settings className="w-5 h-5" />
+                                                Pengaturan Perangkat
                                             </button>
                                         </>
                                     )}
@@ -1379,6 +1426,14 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 </p>
                                             )}
                                         </div>
+                                    </div>
+                                )}
+
+
+                                {/* ================= TAB: DEVICE PERMISSIONS ================= */}
+                                {activeTab === 'device_permissions' && (
+                                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
+                                        <DevicePermissions className="max-w-3xl mx-auto" />
                                     </div>
                                 )}
 
@@ -3099,9 +3154,9 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                     <button
                                         type="button"
                                         onClick={startCamera}
-                                        className="px-4 py-2 border border-dashed border-indigo-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-colors"
+                                        className="px-4 py-2 border border-dashed border-indigo-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-colors flex items-center gap-1.5"
                                     >
-                                        Foto Ulang
+                                        <RefreshCw className="w-4 h-4" /> Retake Foto
                                     </button>
                                     <button
                                         type="button"

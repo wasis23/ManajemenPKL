@@ -44,6 +44,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/tasks/{task}/cancel', [TaskController::class, 'cancel'])->name('tasks.cancel');
         Route::post('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
         Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+        
+        Route::post('/push-subscribe', function (Illuminate\Http\Request $request) {
+            $request->validate(['endpoint' => 'required']);
+            \App\Models\PushSubscription::updateOrCreate(
+                ['user_id' => auth()->id(), 'endpoint' => $request->endpoint],
+                [
+                    'public_key' => $request->keys['p256dh'] ?? null,
+                    'auth_token' => $request->keys['auth'] ?? null,
+                ]
+            );
+            return response()->json(['success' => true]);
+        });
     });
 
     // Admin task actions
