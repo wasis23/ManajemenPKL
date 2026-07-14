@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['user_id', 'date', 'check_in', 'check_out', 'in_latitude', 'in_longitude', 'out_latitude', 'out_longitude', 'status', 'in_selfie', 'out_selfie'])]
+#[Fillable(['user_id', 'date', 'check_in', 'check_out', 'in_latitude', 'in_longitude', 'out_latitude', 'out_longitude', 'status', 'in_selfie', 'out_selfie', 'in_campus', 'out_campus'])]
 class Attendance extends Model
 {
     use HasFactory;

@@ -170,4 +170,48 @@ class MultiCampusAndToleranceTest extends TestCase
         $responseTake->assertRedirect();
         $responseTake->assertSessionHas('success', 'Tugas berhasil diambil. Silakan kerjakan bersama tim Anda.');
     }
+
+    public function test_attendance_saves_correct_campus()
+    {
+        $setting = Setting::first();
+        $setting->update([
+            'latitude_2' => -7.5700,
+            'longitude_2' => 110.8600,
+        ]);
+
+        $student = User::create([
+            'name' => 'Campus Student',
+            'email' => 'campustest@pkl.com',
+            'password' => bcrypt('password'),
+            'role' => 'anak_pkl',
+        ]);
+
+        // 1. Check in near Campus 2 (-7.5700, 110.8600)
+        $this->travelTo(now()->setDate(2026, 7, 12)->setTime(7, 30, 0));
+        Storage::fake('public');
+        
+        $response = $this->actingAs($student)->post(route('attendance.check-in'), [
+            'latitude' => -7.57001,
+            'longitude' => 110.86001,
+            'selfie' => UploadedFile::fake()->image('selfie_in.jpg'),
+        ]);
+        $response->assertRedirect();
+
+        $attendance = Attendance::where('user_id', $student->id)->first();
+        $this->assertNotNull($attendance);
+        $this->assertEquals('Kampus 2', $attendance->in_campus);
+
+        // 2. Check out near Campus 1 (-7.5619, 110.8540)
+        $this->travelTo(now()->setDate(2026, 7, 12)->setTime(16, 30, 0));
+        
+        $responseOut = $this->actingAs($student)->post(route('attendance.check-out'), [
+            'latitude' => -7.56191,
+            'longitude' => 110.85401,
+            'selfie' => UploadedFile::fake()->image('selfie_out.jpg'),
+        ]);
+        $responseOut->assertRedirect();
+
+        $attendance->refresh();
+        $this->assertEquals('Kampus 1', $attendance->out_campus);
+    }
 }

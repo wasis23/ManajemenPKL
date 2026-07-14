@@ -115,6 +115,11 @@ class AttendanceController extends Controller
         $distance = min($distance1, $distance2);
         $inRange = $distance <= $settings->radius;
         $status = $inRange ? ($isLate ? 'late' : 'present') : 'rejected';
+        
+        $inCampus = null;
+        if ($inRange) {
+            $inCampus = ($distance1 <= $distance2) ? 'Kampus 1' : 'Kampus 2';
+        }
 
         Attendance::create([
             'user_id' => $user->id,
@@ -124,6 +129,7 @@ class AttendanceController extends Controller
             'in_longitude' => $request->longitude,
             'in_selfie' => $selfiePath,
             'status' => $status,
+            'in_campus' => $inCampus,
         ]);
 
         if (!$inRange) {
@@ -223,6 +229,11 @@ class AttendanceController extends Controller
         $distance = min($distance1, $distance2);
         $inRange = $distance <= $settings->radius;
 
+        $outCampus = null;
+        if ($inRange) {
+            $outCampus = ($distance1 <= $distance2) ? 'Kampus 1' : 'Kampus 2';
+        }
+
         if (!$inRange) {
             return redirect()->back()->with('error', sprintf(
                 'Absen pulang ditolak! Anda berada di luar radius area kampus (Kampus 1: %.2f m, Kampus 2: %.2f m).',
@@ -243,6 +254,7 @@ class AttendanceController extends Controller
         $attendance->out_latitude = $request->latitude;
         $attendance->out_longitude = $request->longitude;
         $attendance->out_selfie = $selfiePath;
+        $attendance->out_campus = $outCampus;
         $attendance->save();
 
         return redirect()->back()->with('success', 'Absen pulang berhasil! Selamat beristirahat.');

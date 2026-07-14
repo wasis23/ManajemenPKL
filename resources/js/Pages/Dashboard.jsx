@@ -134,6 +134,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                             <th>Jam Pulang</th>
                             <th>Status Absen Masuk</th>
                             <th>Status Absen Pulang</th>
+                            <th>Kampus Masuk</th>
+                            <th>Kampus Pulang</th>
                             <th>Koordinat Masuk</th>
                             <th>Koordinat Keluar</th>
                         </tr>
@@ -166,6 +168,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                     <td>${att.check_out || '--:--'}</td>
                     <td class="${statusInClass}">${statusInText}</td>
                     <td class="${statusOutClass}">${statusOutText}</td>
+                    <td>${att.in_campus || '-'}</td>
+                    <td>${att.out_campus || '-'}</td>
                     <td>${att.in_latitude && att.in_longitude ? `${att.in_latitude}, ${att.in_longitude}` : '-'}</td>
                     <td>${att.out_latitude && att.out_longitude ? `${att.out_latitude}, ${att.out_longitude}` : '-'}</td>
                 </tr>
@@ -2956,6 +2960,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                             <th scope="col" className="px-6 py-3">Absen Pulang</th>
                                                             <th scope="col" className="px-6 py-3">Status Masuk</th>
                                                             <th scope="col" className="px-6 py-3">Status Pulang</th>
+                                                            <th scope="col" className="px-6 py-3">Kampus</th>
                                                             <th scope="col" className="px-6 py-3">Koordinat GPS</th>
                                                         </tr>
                                                     </thead>
@@ -3041,6 +3046,24 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                             <div className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 mt-1 uppercase">
                                                                                 Izin: {att.permit.type.replace('_', ' ')}
                                                                             </div>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 text-xs">
+                                                                        {att.in_campus && att.out_campus ? (
+                                                                            att.in_campus === att.out_campus ? (
+                                                                                <span className="font-semibold text-gray-800 dark:text-white">{att.in_campus}</span>
+                                                                            ) : (
+                                                                                <div className="space-y-1">
+                                                                                    <div><span className="text-gray-400 font-medium">Masuk:</span> <span className="font-semibold text-gray-800 dark:text-white">{att.in_campus}</span></div>
+                                                                                    <div><span className="text-gray-400 font-medium">Pulang:</span> <span className="font-semibold text-gray-800 dark:text-white">{att.out_campus}</span></div>
+                                                                                </div>
+                                                                            )
+                                                                        ) : att.in_campus ? (
+                                                                            <div><span className="text-gray-400 font-medium">Masuk:</span> <span className="font-semibold text-gray-800 dark:text-white">{att.in_campus}</span></div>
+                                                                        ) : att.out_campus ? (
+                                                                            <div><span className="text-gray-400 font-medium">Pulang:</span> <span className="font-semibold text-gray-800 dark:text-white">{att.out_campus}</span></div>
+                                                                        ) : (
+                                                                            <span className="text-gray-400">-</span>
                                                                         )}
                                                                     </td>
                                                                     <td className="px-6 py-4 text-xs space-y-1">
