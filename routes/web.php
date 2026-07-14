@@ -95,3 +95,25 @@ Route::get('/run-storage-link', function () {
         return 'Error: ' . $e->getMessage();
     }
 });
+
+Route::get('/run-migration', function () {
+    try {
+        Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return 'Migration run successfully! Output:<br><pre>' . Illuminate\Support\Facades\Artisan::output() . '</pre>';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
+Route::get('/clear-cache', function () {
+    try {
+        Illuminate\Support\Facades\Artisan::call('config:clear');
+        Illuminate\Support\Facades\Artisan::call('cache:clear');
+        Illuminate\Support\Facades\Artisan::call('route:clear');
+        Illuminate\Support\Facades\Artisan::call('view:clear');
+        return 'Caches cleared successfully!';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
