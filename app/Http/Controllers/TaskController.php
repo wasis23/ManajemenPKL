@@ -6,49 +6,47 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class TaskController extends Controller
 {
-    private function sendPushNotification($title, $message) {
+    private function sendTelegramNotification(Task $task, $isPublic = false) {
         try {
-            $subscriptions = \App\Models\PushSubscription::all();
-            if ($subscriptions->isEmpty()) return;
+            $settings = \App\Models\Setting::first();
+            $token = $settings?->telegram_bot_token ?? env('TELEGRAM_BOT_TOKEN');
+            $chatId = $settings?->telegram_chat_id ?? env('TELEGRAM_CHAT_ID');
 
-            if (!env('VAPID_PUBLIC_KEY') || !env('VAPID_PRIVATE_KEY')) {
-                \Log::warning('VAPID keys missing. Notifications will not be sent.');
+            if (!$token || !$chatId) {
+                \Log::warning('Telegram Bot Token or Chat ID is missing. Notification will not be sent.');
                 return;
             }
 
-            $auth = [
-                'VAPID' => [
-                    'subject' => 'mailto:admin@example.com',
-                    'publicKey' => env('VAPID_PUBLIC_KEY'),
-                    'privateKey' => env('VAPID_PRIVATE_KEY'),
-                ],
-            ];
+            $title = $isPublic ? "📢 <b>TUGAS ADAUAN BARU</b> 📢" : "🆕 <b>TUGAS BARU</b> 🆕";
             
-            $webPush = new \Minishlink\WebPush\WebPush($auth);
-            $payload = json_encode(['title' => $title, 'message' => $message, 'url' => '/dashboard']);
+            $message = "{$title}\n\n";
+            $message .= "📌 <b>Judul:</b> " . htmlspecialchars($task->title) . "\n";
+            $message .= "📝 <b>Deskripsi:</b> " . htmlspecialchars($task->description) . "\n";
+            $message .= "📍 <b>Lokasi:</b> " . htmlspecialchars($task->target_room) . " (" . htmlspecialchars($task->campus_type) . ")\n";
+            $message .= "👤 <b>Pengaju:</b> " . htmlspecialchars($task->requester_name) . "\n";
+            $message .= "👥 <b>Kuota:</b> " . htmlspecialchars($task->quota) . " orang\n\n";
             
-            foreach ($subscriptions as $sub) {
-                $webPush->queueNotification(
-                    \Minishlink\WebPush\Subscription::create([
-                        'endpoint' => $sub->endpoint,
-                        'publicKey' => $sub->public_key,
-                        'authToken' => $sub->auth_token,
-                    ]),
-                    $payload
-                );
-            }
+            $appUrl = env('APP_URL', 'http://localhost');
+            $message .= "🔗 <a href=\"{$appUrl}/dashboard\">Buka Website PKL untuk Mengambil Tugas</a>";
+
+            $url = "https://api.telegram.org/bot{$token}/sendMessage";
             
-            foreach ($webPush->flush() as $report) {
-                if (!$report->isSuccess() && $report->isSubscriptionExpired()) {
-                    $endpoint = $report->getRequest()->getUri()->__toString();
-                    \App\Models\PushSubscription::where('endpoint', $endpoint)->delete();
-                }
+            $response = Http::post($url, [
+                'chat_id' => $chatId,
+                'text' => $message,
+                'parse_mode' => 'HTML',
+                'disable_web_page_preview' => true,
+            ]);
+
+            if ($response->failed()) {
+                \Log::error('Telegram API Error: ' . $response->body());
             }
         } catch (\Exception $e) {
-            \Log::error('WebPush Error: ' . $e->getMessage());
+            \Log::error('Telegram Notification Error: ' . $e->getMessage());
         }
     }
     /**
@@ -70,7 +68,7 @@ class TaskController extends Controller
             return redirect()->back()->with('error', 'Hanya dosen, staf, atau admin yang dapat membuat tugas.');
         }
 
-        Task::create([
+        $task = Task::create([
             'title' => $request->title,
             'description' => $request->description,
             'reporter_id' => $user->id,
@@ -81,10 +79,7 @@ class TaskController extends Controller
             'campus_type' => $request->campus_type,
         ]);
 
-        $this->sendPushNotification(
-            'Tugas Baru: ' . $request->title, 
-            'Ada tugas baru di ' . $request->target_room . '. Segera ambil di Papan Lowongan!'
-        );
+        $this->sendTelegramNotification($task, false);
 
         return redirect()->back()->with('success', 'Tugas berhasil dilaporkan.');
     }
@@ -281,7 +276,7 @@ class TaskController extends Controller
             'campus_type' => 'required|string|in:Kampus 1,Kampus 2',
         ]);
 
-        Task::create([
+        $task = Task::create([
             'title' => $request->title,
             'description' => $request->description,
             'requester_name' => $request->requester_name,
@@ -292,10 +287,7 @@ class TaskController extends Controller
             'reporter_id' => null, // Publicly submitted task
         ]);
 
-        $this->sendPushNotification(
-            'Tugas Aduan Baru: ' . $request->title, 
-            'Ada laporan dari ' . $request->requester_name . ' di ' . $request->target_room . '. Segera cek di Papan Lowongan!'
-        );
+        $this->sendTelegramNotification($task, true);
 
         return redirect()->route('tasks.public.list')->with('success', 'Tugas aduan baru berhasil diajukan!');
     }

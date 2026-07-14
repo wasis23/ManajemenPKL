@@ -20,6 +20,9 @@ class SettingController extends Controller
             'radius' => 'required|integer|min:10|max:1000',
             'work_hour_start' => 'required|date_format:H:i',
             'work_hour_end' => 'required|date_format:H:i',
+            'telegram_bot_token' => 'nullable|string',
+            'telegram_chat_id' => 'nullable|string',
+            'telegram_channel_link' => 'nullable|string',
         ]);
 
         $user = auth()->user();
@@ -35,8 +38,11 @@ class SettingController extends Controller
         $settings->radius = $request->radius;
         $settings->work_hour_start = $request->work_hour_start;
         $settings->work_hour_end = $request->work_hour_end;
+        $settings->telegram_bot_token = $request->telegram_bot_token;
+        $settings->telegram_chat_id = $request->telegram_chat_id;
+        $settings->telegram_channel_link = $request->telegram_channel_link;
         $settings->save();
 
-        return redirect()->back()->with('success', 'Pengaturan geofencing dan jam kerja kampus berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Pengaturan geofencing, jam kerja, dan notifikasi Telegram berhasil diperbarui.');
     }
 }

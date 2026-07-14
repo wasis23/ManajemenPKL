@@ -455,7 +455,10 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         longitude_2: settings?.longitude_2 || 110.8550,
         radius: settings?.radius || 50,
         work_hour_start: settings?.work_hour_start ? settings.work_hour_start.substring(0, 5) : '08:00',
-        work_hour_end: settings?.work_hour_end ? settings.work_hour_end.substring(0, 5) : '16:00'
+        work_hour_end: settings?.work_hour_end ? settings.work_hour_end.substring(0, 5) : '16:00',
+        telegram_bot_token: settings?.telegram_bot_token || '',
+        telegram_chat_id: settings?.telegram_chat_id || '',
+        telegram_channel_link: settings?.telegram_channel_link || ''
     });
 
     const userForm = useForm({
@@ -1905,6 +1908,56 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         required
                                                     />
                                                     {settingsForm.errors.work_hour_end && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.work_hour_end}</p>}
+                                                </div>
+                                            </div>
+
+                                            {/* Telegram Notifications Settings */}
+                                            <div className="p-4 bg-sky-50/30 dark:bg-sky-950/10 rounded-xl border border-sky-100 dark:border-sky-900/30 space-y-4 mb-4">
+                                                <h4 className="text-xs font-bold text-sky-650 dark:text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.4.52-.46-.01-1.35-.26-2.01-.48-.81-.27-1.46-.42-1.4-.88.03-.24.38-.49 1.04-.75 4.07-1.77 6.79-2.94 8.15-3.5 3.88-1.61 4.68-1.89 5.21-1.9.11 0 .37.03.54.17.14.11.18.27.2.38-.01.07.01.23 0 .34z"/>
+                                                    </svg>
+                                                    Notifikasi Telegram Channel
+                                                </h4>
+                                                
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Telegram Bot Token</label>
+                                                        <input
+                                                            type="text"
+                                                            value={settingsForm.data.telegram_bot_token}
+                                                            onChange={e => settingsForm.setData('telegram_bot_token', e.target.value)}
+                                                            placeholder="Contoh: 123456789:ABCdef..."
+                                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none dark:text-white"
+                                                        />
+                                                        {settingsForm.errors.telegram_bot_token && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.telegram_bot_token}</p>}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Telegram Chat ID</label>
+                                                            <input
+                                                                type="text"
+                                                                value={settingsForm.data.telegram_chat_id}
+                                                                onChange={e => settingsForm.setData('telegram_chat_id', e.target.value)}
+                                                                placeholder="Contoh: @channel_username atau -100xxx"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none dark:text-white"
+                                                            />
+                                                            {settingsForm.errors.telegram_chat_id && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.telegram_chat_id}</p>}
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Telegram Channel Link</label>
+                                                            <input
+                                                                type="text"
+                                                                value={settingsForm.data.telegram_channel_link}
+                                                                onChange={e => settingsForm.setData('telegram_channel_link', e.target.value)}
+                                                                placeholder="Contoh: https://t.me/channel_username"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none dark:text-white"
+                                                            />
+                                                            {settingsForm.errors.telegram_channel_link && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.telegram_channel_link}</p>}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 

@@ -1,34 +1,29 @@
 import { useState, useEffect } from 'react';
 import PrimaryButton from '@/Components/PrimaryButton';
+import { usePage } from '@inertiajs/react';
 import { Camera, MapPin, Bell, ShieldAlert, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function DevicePermissions({ className = '' }) {
+    const { telegram_channel_link } = usePage().props;
+    
     const [permissions, setPermissions] = useState({
-        notification: 'default',
         location: 'prompt',
         camera: 'prompt'
     });
     
     const [isSupported, setIsSupported] = useState({
-        notification: false,
         location: false,
         camera: false
     });
 
     const checkPermissions = async () => {
         const support = {
-            notification: 'Notification' in window,
             location: 'geolocation' in navigator,
             camera: 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices
         };
         setIsSupported(support);
 
         const currentPerms = { ...permissions };
-
-        // Check Notification
-        if (support.notification) {
-            currentPerms.notification = Notification.permission;
-        }
 
         // Check Location
         if (support.location && navigator.permissions) {
@@ -62,38 +57,6 @@ export default function DevicePermissions({ className = '' }) {
     useEffect(() => {
         checkPermissions();
     }, []);
-
-    const requestNotification = async () => {
-        if (!isSupported.notification) return;
-        try {
-            const result = await Notification.requestPermission();
-            setPermissions(prev => ({ ...prev, notification: result }));
-            if (result === 'granted' && 'serviceWorker' in navigator) {
-                const registration = await navigator.serviceWorker.register('/sw.js');
-                
-                // Get VAPID public key from backend or hardcode for now (Must match VAPID_PUBLIC_KEY in .env)
-                // Using a fallback key format, but it requires the actual server key
-                // Since we don't have a dynamic env key injector here, we'll try to subscribe
-                
-                try {
-                    // Try to fetch from a meta tag or configure later
-                    const subscription = await registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: 'BGpI_FIzisvDSQ322cSvlSSbr5EEg5toXCQU2Fidy-DcIInX6vC0hYSxsM0vHoP63EGf5rAasH-vRJJLsiZXEqE'
-                    });
-                    
-                    await window.axios.post('/push-subscribe', subscription.toJSON());
-                } catch (e) {
-                    console.log('Push manager subscription failed. VAPID key might be needed.', e);
-                }
-                
-            } else if (result === 'denied') {
-                alert('Notifikasi diblokir. Silakan ubah izin melalui ikon gembok (🔒) di sebelah URL browser.');
-            }
-        } catch (error) {
-            console.error('Error requesting notification:', error);
-        }
-    };
 
     const requestLocation = () => {
         if (!isSupported.location) return;
@@ -148,10 +111,10 @@ export default function DevicePermissions({ className = '' }) {
         <section className={className}>
             <header>
                 <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Pengaturan Akses Perangkat (Permissions)
+                    Pengaturan Akses Perangkat & Notifikasi
                 </h2>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Sistem Manajemen PKL membutuhkan beberapa akses perangkat agar dapat berfungsi optimal (untuk absensi & notifikasi). Anda bisa mengecek dan memintanya di sini.
+                    Sistem Manajemen PKL membutuhkan beberapa akses perangkat agar dapat berfungsi optimal (untuk absensi), serta menyediakan integrasi Telegram Channel untuk notifikasi tugas baru.
                 </p>
             </header>
 
@@ -203,31 +166,44 @@ export default function DevicePermissions({ className = '' }) {
                     )}
                 </div>
 
-                {/* Notifications */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-xl">
+                {/* Telegram Notifications */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gradient-to-br from-sky-500/5 to-transparent">
                     <div className="flex items-start gap-4">
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg dark:bg-emerald-900/30 dark:text-emerald-400">
-                            <Bell className="w-6 h-6" />
+                        <div className="p-3 bg-sky-50 text-sky-600 rounded-lg dark:bg-sky-900/30 dark:text-sky-400">
+                            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.11.02-1.93 1.23-5.46 3.62-.51.35-.98.53-1.4.52-.46-.01-1.35-.26-2.01-.48-.81-.27-1.46-.42-1.4-.88.03-.24.38-.49 1.04-.75 4.07-1.77 6.79-2.94 8.15-3.5 3.88-1.61 4.68-1.89 5.21-1.9.11 0 .37.03.54.17.14.11.18.27.2.38-.01.07.01.23 0 .34z"/>
+                            </svg>
                         </div>
                         <div>
                             <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                Notifikasi Browser
-                                <StatusBadge status={permissions.notification} />
+                                Notifikasi Telegram Channel
+                                <span className="inline-flex items-center gap-1 text-xs font-bold text-sky-650 bg-sky-50 px-2 py-0.5 rounded-full dark:bg-sky-950/40 dark:text-sky-300">
+                                    Aktif (Real-time)
+                                </span>
                             </h3>
                             <p className="text-sm text-gray-500 mt-1">
-                                Digunakan untuk memberitahu Anda secara real-time apabila Dosen memberikan tugas baru.
+                                Informasi lowongan tugas baru akan langsung dikirimkan ke channel Telegram secara real-time.
                             </p>
                         </div>
                     </div>
-                    {permissions.notification !== 'granted' && (
-                        <PrimaryButton onClick={requestNotification}>
-                            {permissions.notification === 'denied' ? 'Cek Ulang Izin' : 'Aktifkan Notifikasi'}
-                        </PrimaryButton>
+                    {telegram_channel_link ? (
+                        <a
+                            href={telegram_channel_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
+                        >
+                            Gabung Channel Telegram
+                        </a>
+                    ) : (
+                        <span className="text-xs font-semibold text-gray-400 italic">
+                            Link channel belum dikonfigurasi
+                        </span>
                     )}
                 </div>
 
                 {/* Helper text if any denied */}
-                {(permissions.location === 'denied' || permissions.camera === 'denied' || permissions.notification === 'denied') && (
+                {(permissions.location === 'denied' || permissions.camera === 'denied') && (
                     <div className="p-4 bg-rose-50 rounded-xl border border-rose-100 dark:bg-rose-900/20 dark:border-rose-800">
                         <p className="text-sm text-rose-700 dark:text-rose-400">
                             <strong>Info:</strong> Anda telah memblokir beberapa akses. Aplikasi web tidak bisa memaksa untuk membuka blokir. Anda harus mengkliknya secara manual melalui <strong>ikon gembok (🔒)</strong> di samping URL browser, lalu setel menjadi "Izinkan", setelah itu refresh halaman ini.

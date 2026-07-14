@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'telegram_channel_link' => \App\Models\Setting::first()?->telegram_channel_link ?? env('TELEGRAM_CHANNEL_LINK'),
         ];
     }
 }
