@@ -3000,9 +3000,9 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                     <button
                                         type="button"
                                         onClick={startCamera}
-                                        className="px-4 py-2 border border-dashed border-indigo-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-colors"
+                                        className="px-4 py-2 border border-dashed border-indigo-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-colors flex items-center gap-1.5"
                                     >
-                                        Foto Ulang
+                                        <RefreshCw className="w-4 h-4" /> Retake Foto
                                     </button>
                                     <button
                                         type="button"
