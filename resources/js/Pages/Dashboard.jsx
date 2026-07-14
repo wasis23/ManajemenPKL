@@ -196,8 +196,19 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         setCapturedSelfie(null);
         setSelfieBlob(null);
         try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            let videoConstraints = true;
+            
+            if (videoDevices.length > 1) {
+                videoConstraints = { facingMode: 'user' };
+            } else if (videoDevices.length === 1) {
+                videoConstraints = true;
+            }
+            
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user' }
+                video: videoConstraints
             });
             setCameraStream(stream);
             if (videoRef.current) {
@@ -214,7 +225,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                     videoRef.current.srcObject = stream;
                 }
             } catch (fallbackErr) {
-                setCameraError("Gagal mengakses kamera depan. Pastikan izin kamera diberikan.");
+                setCameraError("Gagal mengakses kamera. Pastikan izin kamera diberikan.");
             }
         }
     };
