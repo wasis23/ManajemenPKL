@@ -79,7 +79,7 @@ export default function DevicePermissions({ className = '' }) {
                     // Try to fetch from a meta tag or configure later
                     const subscription = await registration.pushManager.subscribe({
                         userVisibleOnly: true,
-                        applicationServerKey: 'BJEIdW9ROpClOg06Gg2FlbJnsXVFgCWn7heZkxUnaUHVOwMCPXGErquO__vatHmzB6LGR8MVp-pxr5Y2KW136c8'
+                        applicationServerKey: 'BGpI_FIzisvDSQ322cSvlSSbr5EEg5toXCQU2Fidy-DcIInX6vC0hYSxsM0vHoP63EGf5rAasH-vRJJLsiZXEqE'
                     });
                     
                     await window.axios.post('/push-subscribe', subscription.toJSON());
