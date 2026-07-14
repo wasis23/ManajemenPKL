@@ -69,7 +69,24 @@ export default function DevicePermissions({ className = '' }) {
             const result = await Notification.requestPermission();
             setPermissions(prev => ({ ...prev, notification: result }));
             if (result === 'granted' && 'serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js');
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                
+                // Get VAPID public key from backend or hardcode for now (Must match VAPID_PUBLIC_KEY in .env)
+                // Using a fallback key format, but it requires the actual server key
+                // Since we don't have a dynamic env key injector here, we'll try to subscribe
+                
+                try {
+                    // Try to fetch from a meta tag or configure later
+                    const subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: 'BIVnyLrfsrbKoTwd-UoxxrHcfzB31exZMzTuDuUwsbKWeHanTuwtMHzA5yF5AlX2gLbKLPPiCOM6xBlCdVDG0j4'
+                    });
+                    
+                    await window.axios.post('/push-subscribe', subscription.toJSON());
+                } catch (e) {
+                    console.log('Push manager subscription failed. VAPID key might be needed.', e);
+                }
+                
             } else if (result === 'denied') {
                 alert('Notifikasi diblokir. Silakan ubah izin melalui ikon gembok (🔒) di sebelah URL browser.');
             }

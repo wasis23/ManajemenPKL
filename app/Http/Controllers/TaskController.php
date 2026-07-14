@@ -9,6 +9,48 @@ use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
+    private function sendPushNotification($title, $message) {
+        try {
+            $subscriptions = \App\Models\PushSubscription::all();
+            if ($subscriptions->isEmpty()) return;
+
+            if (!env('VAPID_PUBLIC_KEY') || !env('VAPID_PRIVATE_KEY')) {
+                \Log::warning('VAPID keys missing. Notifications will not be sent.');
+                return;
+            }
+
+            $auth = [
+                'VAPID' => [
+                    'subject' => 'mailto:admin@example.com',
+                    'publicKey' => env('VAPID_PUBLIC_KEY'),
+                    'privateKey' => env('VAPID_PRIVATE_KEY'),
+                ],
+            ];
+            
+            $webPush = new \Minishlink\WebPush\WebPush($auth);
+            $payload = json_encode(['title' => $title, 'message' => $message, 'url' => '/dashboard']);
+            
+            foreach ($subscriptions as $sub) {
+                $webPush->queueNotification(
+                    \Minishlink\WebPush\Subscription::create([
+                        'endpoint' => $sub->endpoint,
+                        'publicKey' => $sub->public_key,
+                        'authToken' => $sub->auth_token,
+                    ]),
+                    $payload
+                );
+            }
+            
+            foreach ($webPush->flush() as $report) {
+                if (!$report->isSuccess() && $report->isSubscriptionExpired()) {
+                    $endpoint = $report->getRequest()->getUri()->__toString();
+                    \App\Models\PushSubscription::where('endpoint', $endpoint)->delete();
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('WebPush Error: ' . $e->getMessage());
+        }
+    }
     /**
      * Create a new task (Admin, Dosen, Staf)
      */
@@ -38,6 +80,11 @@ class TaskController extends Controller
             'target_room' => $request->target_room,
             'campus_type' => $request->campus_type,
         ]);
+
+        $this->sendPushNotification(
+            'Tugas Baru: ' . $request->title, 
+            'Ada tugas baru di ' . $request->target_room . '. Segera ambil di Papan Lowongan!'
+        );
 
         return redirect()->back()->with('success', 'Tugas berhasil dilaporkan.');
     }
@@ -244,6 +291,11 @@ class TaskController extends Controller
             'status' => 'pending',
             'reporter_id' => null, // Publicly submitted task
         ]);
+
+        $this->sendPushNotification(
+            'Tugas Aduan Baru: ' . $request->title, 
+            'Ada laporan dari ' . $request->requester_name . ' di ' . $request->target_room . '. Segera cek di Papan Lowongan!'
+        );
 
         return redirect()->route('tasks.public.list')->with('success', 'Tugas aduan baru berhasil diajukan!');
     }
