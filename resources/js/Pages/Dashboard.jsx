@@ -5,9 +5,21 @@ import {
   MapPin, Award, ClipboardList, Settings, Users, CheckCircle, AlertTriangle, 
   Clock, Plus, Trash2, Camera, ShieldAlert, AwardIcon, Compass, RefreshCw,
   Trophy, HelpCircle, UserPlus, Star, ArrowRight, UploadCloud, Check, X, Pencil,
-  GraduationCap
+  GraduationCap, Calendar
 } from 'lucide-react';
 import DevicePermissions from '@/Pages/Profile/Partials/DevicePermissions';
+
+// Indonesian Date Formatter
+const formatDateIndo = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+};
 
 // Haversine formula in JS
 function getDistanceJS(lat1, lon1, lat2, lon2) {
@@ -21,7 +33,7 @@ function getDistanceJS(lat1, lon1, lat2, lon2) {
     return R * c; // in meters
 }
 
-export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = 0, schools = [] }) {
+export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = 0, schools = [], agendas = [] }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
 
@@ -499,6 +511,69 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         name: '',
     });
 
+    // Agenda management forms and handlers
+    const agendaForm = useForm({
+        title: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0],
+        start_time: '',
+        end_time: ''
+    });
+
+    const [editingAgenda, setEditingAgenda] = useState(null);
+    const editAgendaForm = useForm({
+        title: '',
+        description: '',
+        date: '',
+        start_time: '',
+        end_time: ''
+    });
+
+    const handleCreateAgenda = (e) => {
+        e.preventDefault();
+        agendaForm.post(route('agendas.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                agendaForm.reset('title', 'description', 'start_time', 'end_time');
+            }
+        });
+    };
+
+    const startEditingAgenda = (agenda) => {
+        setEditingAgenda(agenda);
+        editAgendaForm.setData({
+            title: agenda.title,
+            description: agenda.description || '',
+            date: agenda.date,
+            start_time: agenda.start_time ? agenda.start_time.substring(0, 5) : '',
+            end_time: agenda.end_time ? agenda.end_time.substring(0, 5) : ''
+        });
+    };
+
+    const cancelEditingAgenda = () => {
+        setEditingAgenda(null);
+        editAgendaForm.reset();
+    };
+
+    const handleUpdateAgenda = (e) => {
+        e.preventDefault();
+        editAgendaForm.patch(route('agendas.update', editingAgenda.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEditingAgenda(null);
+                editAgendaForm.reset();
+            }
+        });
+    };
+
+    const deleteAgenda = (agendaId) => {
+        if (confirm('Apakah Anda yakin ingin menghapus agenda ini?')) {
+            router.delete(route('agendas.destroy', agendaId), {
+                preserveScroll: true
+            });
+        }
+    };
+
     // Handle Flash Notifications
     useEffect(() => {
         if (flash.success) {
@@ -857,6 +932,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                             </button>
 
                                             <button
+                                                onClick={() => setActiveTab('agenda')}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    activeTab === 'agenda'
+                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                }`}
+                                            >
+                                                <Calendar className="w-5 h-5" />
+                                                Agenda Kegiatan
+                                            </button>
+
+                                            <button
                                                 onClick={() => setActiveTab('device_permissions')}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                                                     activeTab === 'device_permissions'
@@ -871,6 +958,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                     )}
 
                                     {user.role !== 'anak_pkl' && (
+                                        <>
                                         <button
                                             onClick={() => setActiveTab('tasks')}
                                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
@@ -882,6 +970,19 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                             <ClipboardList className="w-5 h-5" />
                                             Kelola Laporan Tugas
                                         </button>
+
+                                        <button
+                                            onClick={() => setActiveTab('agenda')}
+                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                activeTab === 'agenda'
+                                                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                            }`}
+                                        >
+                                            <Calendar className="w-5 h-5" />
+                                            Agenda Kegiatan
+                                        </button>
+                                        </>
                                     )}
 
                                     <button
@@ -957,6 +1058,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                             </button>
 
                                             <button
+                                                onClick={() => setActiveTab('manage_agendas')}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    activeTab === 'manage_agendas'
+                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                }`}
+                                            >
+                                                <Calendar className="w-5 h-5" />
+                                                Kelola Agenda
+                                            </button>
+
+                                            <button
                                                 onClick={() => setActiveTab('settings')}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                                                     activeTab === 'settings'
@@ -976,6 +1089,237 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                         {/* Right Column Content Areas */}
                         <div className="lg:col-span-9">
                             <div className="space-y-6">
+
+                                {/* ================= TAB: AGENDA (STUDENTS / VIEW ONLY) ================= */}
+                                {activeTab === 'agenda' && (
+                                    <div className="space-y-6">
+                                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                                <Calendar className="w-5 h-5 text-indigo-500" />
+                                                Agenda Kegiatan & Informasi PKL
+                                            </h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                Berikut adalah jadwal agenda kegiatan dan informasi penting yang telah ditentukan oleh Administrator.
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {agendas?.length > 0 ? (
+                                                agendas.map((agenda) => {
+                                                    const agendaDate = new Date(agenda.date);
+                                                    const today = new Date();
+                                                    today.setHours(0,0,0,0);
+                                                    const isUpcoming = agendaDate >= today;
+
+                                                    return (
+                                                        <div key={agenda.id} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
+                                                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                                                                <div className="space-y-2">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${
+                                                                            isUpcoming 
+                                                                                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300' 
+                                                                                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-450'
+                                                                        }`}>
+                                                                            {isUpcoming ? 'Mendatang' : 'Selesai'}
+                                                                        </span>
+                                                                        <span className="text-xs text-gray-450 dark:text-gray-400">
+                                                                            Dibuat oleh: {agenda.creator?.name || 'Administrator'}
+                                                                        </span>
+                                                                    </div>
+                                                                    <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
+                                                                        {agenda.title}
+                                                                    </h4>
+                                                                    <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+                                                                        {agenda.description || 'Tidak ada deskripsi.'}
+                                                                    </p>
+                                                                </div>
+
+                                                                <div className="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl shrink-0 border border-gray-150 dark:border-gray-700 flex flex-row md:flex-col items-center md:items-start justify-between md:justify-center gap-4 md:w-56">
+                                                                    <div className="flex items-center gap-2 text-sm text-gray-750 dark:text-gray-300">
+                                                                        <Calendar className="w-4 h-4 text-indigo-500" />
+                                                                        <span className="font-semibold text-xs">{formatDateIndo(agenda.date)}</span>
+                                                                    </div>
+                                                                    {agenda.start_time && (
+                                                                        <div className="flex items-center gap-2 text-sm text-gray-750 dark:text-gray-300">
+                                                                            <Clock className="w-4 h-4 text-indigo-500" />
+                                                                            <span className="font-semibold text-xs">
+                                                                                {agenda.start_time.substring(0, 5)} {agenda.end_time ? `- ${agenda.end_time.substring(0, 5)}` : ''} WIB
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 shadow-sm border border-gray-100 dark:border-gray-700 text-center text-gray-500">
+                                                    <Calendar className="w-12 h-12 text-gray-350 mx-auto mb-3 animate-bounce" />
+                                                    <p className="font-semibold text-gray-700 dark:text-gray-300">Belum Ada Agenda</p>
+                                                    <p className="text-sm text-gray-400 mt-1">Saat ini belum ada jadwal agenda kegiatan yang dipublikasikan.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ================= TAB: MANAGE AGENDAS (ADMIN ONLY) ================= */}
+                                {activeTab === 'manage_agendas' && user.role === 'admin' && (
+                                    <div className="space-y-6">
+                                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                                <Calendar className="w-5 h-5 text-indigo-500" />
+                                                Kelola Agenda Kegiatan & Informasi PKL
+                                            </h3>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                Tambahkan, perbarui, atau hapus jadwal agenda kegiatan yang ditujukan untuk anak-anak PKL.
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                                            {/* Form section */}
+                                            <div className="xl:col-span-4 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
+                                                <h4 className="font-bold text-gray-900 dark:text-white text-base">
+                                                    {editingAgenda ? 'Edit Agenda' : 'Tambah Agenda Baru'}
+                                                </h4>
+                                                
+                                                <form onSubmit={editingAgenda ? handleUpdateAgenda : handleCreateAgenda} className="space-y-4">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Judul Agenda</label>
+                                                        <input
+                                                            type="text"
+                                                            value={editingAgenda ? editAgendaForm.data.title : agendaForm.data.title}
+                                                            onChange={e => editingAgenda ? editAgendaForm.setData('title', e.target.value) : agendaForm.setData('title', e.target.value)}
+                                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-905 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            placeholder="Contoh: Pembekalan PKL..."
+                                                            required
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Deskripsi / Informasi</label>
+                                                        <textarea
+                                                            value={editingAgenda ? editAgendaForm.data.description : agendaForm.data.description}
+                                                            onChange={e => editingAgenda ? editAgendaForm.setData('description', e.target.value) : agendaForm.setData('description', e.target.value)}
+                                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-905 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white h-24 resize-none"
+                                                            placeholder="Tulis deskripsi detail agenda atau tempat pelaksanaan..."
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tanggal Kegiatan</label>
+                                                        <input
+                                                            type="date"
+                                                            value={editingAgenda ? editAgendaForm.data.date : agendaForm.data.date}
+                                                            onChange={e => editingAgenda ? editAgendaForm.setData('date', e.target.value) : agendaForm.setData('date', e.target.value)}
+                                                            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-905 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            required
+                                                        />
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jam Mulai</label>
+                                                            <input
+                                                                type="time"
+                                                                value={editingAgenda ? editAgendaForm.data.start_time : agendaForm.data.start_time}
+                                                                onChange={e => editingAgenda ? editAgendaForm.setData('start_time', e.target.value) : agendaForm.setData('start_time', e.target.value)}
+                                                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-905 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            />
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jam Selesai</label>
+                                                            <input
+                                                                type="time"
+                                                                value={editingAgenda ? editAgendaForm.data.end_time : agendaForm.data.end_time}
+                                                                onChange={e => editingAgenda ? editAgendaForm.setData('end_time', e.target.value) : agendaForm.setData('end_time', e.target.value)}
+                                                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-905 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex gap-2 pt-2">
+                                                        <button
+                                                            type="submit"
+                                                            className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm"
+                                                        >
+                                                            {editingAgenda ? 'Simpan Perubahan' : 'Tambah Agenda'}
+                                                        </button>
+                                                        {editingAgenda && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={cancelEditingAgenda}
+                                                                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-250 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-xl text-xs font-bold"
+                                                            >
+                                                                Batal
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            {/* List section */}
+                                            <div className="xl:col-span-8 space-y-4">
+                                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                                                    <h4 className="font-bold text-gray-900 dark:text-white text-base mb-4">Daftar Agenda Kegiatan</h4>
+                                                    <div className="overflow-x-auto">
+                                                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                                            <thead className="text-xs text-gray-450 uppercase bg-gray-50 dark:bg-gray-900">
+                                                                <tr>
+                                                                    <th className="px-6 py-3">Agenda</th>
+                                                                    <th className="px-6 py-3">Waktu</th>
+                                                                    <th className="px-6 py-3 text-right">Aksi</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                                                {agendas?.length > 0 ? (
+                                                                    agendas.map((agenda) => (
+                                                                        <tr key={agenda.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/20">
+                                                                            <td className="px-6 py-4">
+                                                                                <div className="font-bold text-gray-900 dark:text-white">{agenda.title}</div>
+                                                                                <div className="text-xs text-gray-400 line-clamp-1 mt-0.5">{agenda.description || '-'}</div>
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                                <div className="text-xs font-bold text-gray-800 dark:text-gray-250">{formatDateIndo(agenda.date)}</div>
+                                                                                {agenda.start_time && (
+                                                                                    <div className="text-[10px] text-gray-400 mt-0.5">{agenda.start_time.substring(0, 5)} {agenda.end_time ? `- ${agenda.end_time.substring(0, 5)}` : ''} WIB</div>
+                                                                                )}
+                                                                            </td>
+                                                                            <td className="px-6 py-4 text-right whitespace-nowrap">
+                                                                                <div className="inline-flex gap-2">
+                                                                                    <button
+                                                                                        onClick={() => startEditingAgenda(agenda)}
+                                                                                        className="p-1.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-lg transition-colors"
+                                                                                        title="Edit Agenda"
+                                                                                    >
+                                                                                        <Pencil className="w-4 h-4" />
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={() => deleteAgenda(agenda.id)}
+                                                                                        className="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-lg transition-colors"
+                                                                                        title="Hapus Agenda"
+                                                                                    >
+                                                                                        <Trash2 className="w-4 h-4" />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))
+                                                                ) : (
+                                                                    <tr>
+                                                                        <td colSpan="3" className="px-6 py-8 text-center text-gray-400">Belum ada agenda yang dibuat.</td>
+                                                                    </tr>
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* ================= TAB: ATTENDANCE ================= */}
                                 {activeTab === 'attendance' && user.role === 'anak_pkl' && (

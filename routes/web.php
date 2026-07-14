@@ -8,6 +8,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\AgendaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -74,6 +75,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/users/{user}/points', [UserController::class, 'updatePoints'])->name('users.points.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         Route::patch('/permissions/{permission}/status', [PermissionController::class, 'updateStatus'])->name('permissions.status.update');
+        
+        // Agenda Management
+        Route::post('/agendas', [AgendaController::class, 'store'])->name('agendas.store');
+        Route::patch('/agendas/{agenda}', [AgendaController::class, 'update'])->name('agendas.update');
+        Route::delete('/agendas/{agenda}', [AgendaController::class, 'destroy'])->name('agendas.destroy');
     });
 });
 

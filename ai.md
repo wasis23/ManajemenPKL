@@ -19,11 +19,13 @@ Sistem ini dibuat untuk mendigitalkan serta memantau kinerja anak PKL di lingkun
    * Memilih dan mengambil tugas yang mereka inginkan secara mandiri selama kuota pendaftar masih tersedia.
    * Melakukan absensi masuk dan pulang harian langsung dari HP/perangkat mereka (harus berada dekat kampus).
    * Mengunggah foto sebagai bukti nyata bahwa pekerjaan telah diselesaikan.
+   * Melihat agenda kegiatan dan informasi penting dari kampus.
 3. **Admin (Pengawas & Pemegang Kontrol)**
    * Memiliki akses penuh terhadap seluruh data di dalam sistem.
    * Mendaftarkan akun dosen, staf, dan anak PKL.
    * Menentukan koordinat GPS titik tengah kampus agar sistem tahu batas radius presensi.
    * Memantau papan peringkat (*leaderboard*) performa seluruh anak PKL.
+   * Mengelola (menambah, mengubah, menghapus) agenda kegiatan anak PKL.
 
 ---
 
@@ -51,6 +53,11 @@ Sistem absensi dirancang agar anak PKL benar-benar hadir di wilayah Politeknik I
 2. Browser website akan meminta izin untuk mengakses lokasi (GPS) perangkat tersebut secara langsung.
 3. Sistem di latar belakang akan mengukur jarak (menggunakan rumus matematika Haversine) antara posisi koordinat HP mahasiswa dengan koordinat pusat kampus yang sudah ditentukan Admin.
 4. Jika jaraknya **kurang dari atau sama dengan 50 meter**, absensi berhasil dicatat sebagai "Hadir". Jika jaraknya **lebih dari 50 meter**, sistem akan menolak absensi dan memberi tahu bahwa mahasiswa berada di luar area kampus.
+
+### D. Alur Agenda Kegiatan
+1. Admin membuat agenda baru dengan memasukkan Judul, Deskripsi, Tanggal, Jam Mulai, dan Jam Selesai.
+2. Seluruh anak PKL (dan dosen/staf) dapat melihat agenda tersebut di tab "Agenda Kegiatan" pada dashboard mereka.
+3. Agenda yang akan datang ditandai sebagai "Mendatang", sedangkan agenda yang sudah lewat ditandai sebagai "Selesai".
 
 ---
 
@@ -95,6 +102,15 @@ Digunakan oleh Admin untuk mengubah konfigurasi tanpa membongkar kode program:
 *   Koordinat Garis Lintang (Latitude) pusat kampus.
 *   Koordinat Garis Bujur (Longitude) pusat kampus.
 *   Batas Radius Maksimal (diisi angka 50 untuk batasan 50 meter).
+
+### 6. Tabel Agenda (`agendas`)
+Digunakan untuk mencatat agenda kegiatan:
+*   Judul Agenda (`title`).
+*   Deskripsi/Informasi Agenda (`description`).
+*   Tanggal Kegiatan (`date`).
+*   Jam Mulai (`start_time`).
+*   Jam Selesai (`end_time`).
+*   ID Pembuat Agenda (`created_by`, relasi ke tabel `users`).
 
 ---
 

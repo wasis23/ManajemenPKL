@@ -178,6 +178,8 @@ class DashboardController extends Controller
 
         $availableStudentsCount = max(0, $totalStudentsCount - $absentPermitsCount - $activeStudentsCount);
 
+        $agendas = \App\Models\Agenda::with('creator')->orderBy('date', 'desc')->orderBy('start_time', 'asc')->get();
+
         return Inertia::render('Dashboard', [
             'settings' => $settings,
             'leaderboard' => [
@@ -191,6 +193,7 @@ class DashboardController extends Controller
             'permissions' => $permissions,
             'availableStudentsCount' => $availableStudentsCount,
             'schools' => $user->role === 'admin' ? School::orderBy('name', 'asc')->get() : [],
+            'agendas' => $agendas,
         ]);
     }
 }
