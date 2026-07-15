@@ -12,8 +12,8 @@ class SimlabService
 
     public function __construct()
     {
-        $this->baseUrl = config('services.simlab.base_url', 'https://lab.poltekindonesia.ac.id/api');
-        $this->apiKey = config('services.simlab.api_key', 'simlab_secret_key_230398');
+        $this->baseUrl = config('services.simlab.base_url') ?: 'https://lab.poltekindonesia.ac.id/api';
+        $this->apiKey = config('services.simlab.api_key') ?: 'simlab_secret_key_230398';
     }
 
     /**
