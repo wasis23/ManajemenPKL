@@ -13,7 +13,7 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $today = now()->toDateString();
@@ -169,6 +169,26 @@ class DashboardController extends Controller
 
         $agendas = \App\Models\Agenda::with('creator')->orderBy('date', 'desc')->orderBy('start_time', 'asc')->get();
 
+        // 5. Fetch SIMLAB Data
+        $simlabService = app(\App\Services\SimlabService::class);
+        $labResponse = $simlabService->getLaboratoriums();
+        $simlabLabs = isset($labResponse['success']) && $labResponse['success'] && isset($labResponse['data']) 
+            ? $labResponse['data'] 
+            : [];
+            
+        $filters = [];
+        if ($request->filled('simlab_lab_id')) {
+            $filters['laboratorium_id'] = $request->query('simlab_lab_id');
+        }
+        if ($request->filled('simlab_kondisi')) {
+            $filters['kondisi'] = $request->query('simlab_kondisi');
+        }
+
+        $assetResponse = $simlabService->getAsets($filters);
+        $simlabAssets = isset($assetResponse['success']) && $assetResponse['success'] && isset($assetResponse['data']) 
+            ? $assetResponse['data'] 
+            : [];
+
         return Inertia::render('Dashboard', [
             'settings' => $settings,
             'leaderboard' => [
@@ -183,6 +203,12 @@ class DashboardController extends Controller
             'availableStudentsCount' => $availableStudentsCount,
             'schools' => $user->role === 'admin' ? School::orderBy('name', 'asc')->get() : [],
             'agendas' => $agendas,
+            'simlabLabs' => $simlabLabs,
+            'simlabAssets' => $simlabAssets,
+            'simlabFilters' => [
+                'laboratorium_id' => $request->query('simlab_lab_id', ''),
+                'kondisi' => $request->query('simlab_kondisi', ''),
+            ],
         ]);
     }
 }

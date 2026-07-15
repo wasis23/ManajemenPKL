@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'simlab' => [
+        'base_url' => env('SIMLAB_BASE_URL', 'https://lab.poltekindonesia.ac.id/api'),
+        'api_key' => env('SIMLAB_API_KEY'),
+    ],
+
 ];

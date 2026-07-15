@@ -5,7 +5,7 @@ import {
   MapPin, Award, ClipboardList, Settings, Users, CheckCircle, AlertTriangle, 
   Clock, Plus, Trash2, Camera, ShieldAlert, AwardIcon, Compass, RefreshCw,
   Trophy, HelpCircle, UserPlus, Star, ArrowRight, UploadCloud, Check, X, Pencil,
-  GraduationCap, Calendar
+  GraduationCap, Calendar, Database, Server, PlusCircle, Wrench, BookOpen
 } from 'lucide-react';
 import DevicePermissions from '@/Pages/Profile/Partials/DevicePermissions';
 
@@ -33,7 +33,7 @@ function getDistanceJS(lat1, lon1, lat2, lon2) {
     return R * c; // in meters
 }
 
-export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = {}, schools = [], agendas = [] }) {
+export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = {}, schools = [], agendas = [], simlabLabs = [], simlabAssets = [], simlabFilters = {} }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
 
@@ -527,6 +527,54 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         name: '',
     });
 
+    // SIMLAB states and forms
+    const [simlabActiveSubTab, setSimlabActiveSubTab] = useState('list');
+    const [filterLabId, setFilterLabId] = useState(simlabFilters?.laboratorium_id || '');
+    const [filterKondisi, setFilterKondisi] = useState(simlabFilters?.kondisi || '');
+
+    const simlabAssetForm = useForm({
+        laboratorium_id: '',
+        kode_aset: '',
+        nama_aset: '',
+        jenis_aset: 'statis',
+        kondisi: 'baik',
+        stok: 1,
+        posisi_meja: '',
+        spesifikasi: {
+            cpu: '',
+            ram: ''
+        }
+    });
+
+    const simlabTicketForm = useForm({
+        aset_id: '',
+        nama_pelapor: user ? user.name : '',
+        email_pelapor: user ? user.email : '',
+        deskripsi_kerusakan: ''
+    });
+
+    const simlabLoanForm = useForm({
+        email_peminjam: user ? user.email : '',
+        aset_id: '',
+        jumlah: 1,
+        tanggal_pinjam: new Date().toISOString().split('T')[0],
+        tanggal_kembali_rencana: new Date().toISOString().split('T')[0],
+        catatan: ''
+    });
+
+    const handleFilterChange = (labId, kondisi) => {
+        setFilterLabId(labId);
+        setFilterKondisi(kondisi);
+        router.get(route('dashboard'), {
+            simlab_lab_id: labId,
+            simlab_kondisi: kondisi
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['simlabAssets', 'simlabFilters']
+        });
+    };
+
     // Agenda management forms and handlers
     const agendaForm = useForm({
         title: '',
@@ -684,6 +732,40 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
             onFinish: () => {
                 setAttendanceProcessing(false);
                 scanGps();
+            }
+        });
+    };
+
+    // SIMLAB submit handlers
+    const submitSimlabAsset = (e) => {
+        e.preventDefault();
+        simlabAssetForm.post(route('simlab.assets.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                simlabAssetForm.reset();
+                setSimlabActiveSubTab('list');
+            }
+        });
+    };
+
+    const submitSimlabTicket = (e) => {
+        e.preventDefault();
+        simlabTicketForm.post(route('simlab.tickets.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                simlabTicketForm.reset();
+                setSimlabActiveSubTab('list');
+            }
+        });
+    };
+
+    const submitSimlabLoan = (e) => {
+        e.preventDefault();
+        simlabLoanForm.post(route('simlab.loans.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                simlabLoanForm.reset();
+                setSimlabActiveSubTab('list');
             }
         });
     };
@@ -970,6 +1052,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 <Settings className="w-5 h-5" />
                                                 Pengaturan Perangkat
                                             </button>
+
+                                            <button
+                                                onClick={() => setActiveTab('simlab')}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    activeTab === 'simlab'
+                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                }`}
+                                            >
+                                                <Database className="w-5 h-5" />
+                                                Integrasi SIMLAB
+                                            </button>
                                         </>
                                     )}
 
@@ -997,6 +1091,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                         >
                                             <Calendar className="w-5 h-5" />
                                             Agenda Kegiatan
+                                        </button>
+
+                                        <button
+                                            onClick={() => setActiveTab('simlab')}
+                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                activeTab === 'simlab'
+                                                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                            }`}
+                                        >
+                                            <Database className="w-5 h-5" />
+                                            Integrasi SIMLAB
                                         </button>
                                         </>
                                     )}
@@ -2334,6 +2440,637 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                     </div>
                                 )}
 
+                                {/* ================= TAB: SIMLAB INTEGRATION ================= */}
+                                {activeTab === 'simlab' && (
+                                    <div className="space-y-6">
+                                        {/* Banner SIMLAB */}
+                                        <div className="bg-gradient-to-r from-indigo-600 via-purple-650 to-indigo-800 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                                            <div className="absolute right-0 top-0 opacity-10 transform translate-x-12 -translate-y-12">
+                                                <Database className="w-64 h-64" />
+                                            </div>
+                                            <div className="relative z-10">
+                                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                                                                <span className="w-2 h-2 rounded-full bg-emerald-450 animate-ping"></span>
+                                                                API Connected
+                                                            </span>
+                                                        </div>
+                                                        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                                                            SIMLAB - Sistem Manajemen Laboratorium
+                                                        </h2>
+                                                        <p className="mt-2 text-indigo-105 max-w-2xl text-sm leading-relaxed">
+                                                            Integrasi data laboratorium dan inventaris aset dari sistem SIMLAB utama. Kelola aset, laporkan kerusakan, dan ajukan peminjaman secara langsung dari dashboard Anda.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Sub Navigation Tabs */}
+                                        <div className="bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-wrap gap-2">
+                                            <button
+                                                onClick={() => setSimlabActiveSubTab('list')}
+                                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                                    simlabActiveSubTab === 'list'
+                                                        ? 'bg-indigo-600 text-white shadow-md'
+                                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                                }`}
+                                            >
+                                                <Server className="w-4 h-4" />
+                                                Daftar Aset & Lab
+                                            </button>
+                                            <button
+                                                onClick={() => setSimlabActiveSubTab('add_asset')}
+                                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                                    simlabActiveSubTab === 'add_asset'
+                                                        ? 'bg-indigo-600 text-white shadow-md'
+                                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                                }`}
+                                            >
+                                                <PlusCircle className="w-4 h-4" />
+                                                Tambah Aset Baru
+                                            </button>
+                                            <button
+                                                onClick={() => setSimlabActiveSubTab('ticket')}
+                                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                                    simlabActiveSubTab === 'ticket'
+                                                        ? 'bg-indigo-600 text-white shadow-md'
+                                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                                }`}
+                                            >
+                                                <Wrench className="w-4 h-4" />
+                                                Lapor Kerusakan
+                                            </button>
+                                            <button
+                                                onClick={() => setSimlabActiveSubTab('loan')}
+                                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                                                    simlabActiveSubTab === 'loan'
+                                                        ? 'bg-indigo-600 text-white shadow-md'
+                                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                                }`}
+                                            >
+                                                <BookOpen className="w-4 h-4" />
+                                                Form Peminjaman
+                                            </button>
+                                        </div>
+
+                                        {/* Tab Content: List Aset & Lab */}
+                                        {simlabActiveSubTab === 'list' && (
+                                            <div className="space-y-6">
+                                                {/* Lab stats cards summary */}
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    {simlabLabs.slice(0, 3).map((lab) => (
+                                                        <div key={lab.id} className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-between">
+                                                            <div>
+                                                                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                                                                    {lab.lokasi}
+                                                                </p>
+                                                                <h4 className="text-base font-bold text-gray-800 dark:text-white">
+                                                                    {lab.nama_lab}
+                                                                </h4>
+                                                                <div className="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                                    <span>Kapasitas: {lab.kapasitas_meja} Meja</span>
+                                                                    <span>Aset: {lab.asets_count} unit</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-indigo-50 dark:bg-indigo-950/40 p-3 rounded-xl">
+                                                                <Server className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {simlabLabs.length === 0 && (
+                                                        <div className="col-span-3 text-center py-6 text-gray-500 bg-white dark:bg-gray-800 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+                                                            Tidak ada data laboratorium.
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Filter and Assets */}
+                                                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                                        <div>
+                                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                                                Inventaris Aset Lab
+                                                            </h3>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                                Menampilkan {simlabAssets.length} aset dari SIMLAB
+                                                            </p>
+                                                        </div>
+                                                        {/* Filters Row */}
+                                                        <div className="flex flex-wrap gap-3">
+                                                            <select
+                                                                value={filterLabId}
+                                                                onChange={(e) => handleFilterChange(e.target.value, filterKondisi)}
+                                                                className="px-4 py-2 border border-gray-250 dark:border-gray-700 dark:bg-gray-950 rounded-xl text-sm focus:outline-none dark:text-white"
+                                                            >
+                                                                <option value="">Semua Laboratorium</option>
+                                                                {simlabLabs.map(lab => (
+                                                                    <option key={lab.id} value={lab.id}>{lab.nama_lab}</option>
+                                                                ))}
+                                                            </select>
+                                                            <select
+                                                                value={filterKondisi}
+                                                                onChange={(e) => handleFilterChange(filterLabId, e.target.value)}
+                                                                className="px-4 py-2 border border-gray-250 dark:border-gray-700 dark:bg-gray-950 rounded-xl text-sm focus:outline-none dark:text-white"
+                                                            >
+                                                                <option value="">Semua Kondisi</option>
+                                                                <option value="baik">Baik</option>
+                                                                <option value="rusak_ringan">Rusak Ringan</option>
+                                                                <option value="rusak_berat">Rusak Berat</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Assets Grid */}
+                                                    {simlabAssets.length > 0 ? (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                                            {simlabAssets.map((asset) => (
+                                                                <div key={asset.id} className="bg-gray-50/50 dark:bg-gray-900/40 border border-gray-150 dark:border-gray-800/80 rounded-2xl p-5 hover:shadow-md transition-all flex flex-col justify-between">
+                                                                    <div>
+                                                                        <div className="flex items-start justify-between gap-2 mb-3">
+                                                                            <span className="bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">
+                                                                                {asset.kode_aset}
+                                                                            </span>
+                                                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                                                                                asset.kondisi === 'baik' 
+                                                                                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                                                                                    : asset.kondisi === 'rusak_ringan'
+                                                                                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
+                                                                                    : 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'
+                                                                            }`}>
+                                                                                {asset.kondisi?.replace('_', ' ') || 'baik'}
+                                                                            </span>
+                                                                        </div>
+                                                                        <h4 className="font-bold text-gray-800 dark:text-white mb-1 line-clamp-1">
+                                                                            {asset.nama_aset}
+                                                                        </h4>
+                                                                        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mb-4">
+                                                                            <p className="flex justify-between">
+                                                                                <span>Jenis Aset:</span>
+                                                                                <span className="font-semibold text-gray-700 dark:text-gray-300 capitalize">{asset.jenis_aset}</span>
+                                                                            </p>
+                                                                            <p className="flex justify-between">
+                                                                                <span>Stok:</span>
+                                                                                <span className="font-semibold text-gray-700 dark:text-gray-300">{asset.stok} unit</span>
+                                                                            </p>
+                                                                            {asset.posisi_meja && (
+                                                                                <p className="flex justify-between">
+                                                                                    <span>Posisi Meja:</span>
+                                                                                    <span className="font-semibold text-gray-700 dark:text-gray-300">Meja #{asset.posisi_meja}</span>
+                                                                                </p>
+                                                                            )}
+                                                                            {asset.spesifikasi && typeof asset.spesifikasi === 'object' && (
+                                                                                <div className="mt-2 pt-2 border-t border-gray-150 dark:border-gray-800">
+                                                                                    <p className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 mb-1">Spesifikasi:</p>
+                                                                                    {Object.entries(asset.spesifikasi).map(([key, val]) => (
+                                                                                        <p key={key} className="flex justify-between">
+                                                                                            <span className="uppercase">{key}:</span>
+                                                                                            <span className="font-semibold text-gray-700 dark:text-gray-300">{val}</span>
+                                                                                        </p>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-805 mt-2">
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                simlabTicketForm.setData('aset_id', asset.id);
+                                                                                setSimlabActiveSubTab('ticket');
+                                                                            }}
+                                                                            className="flex-1 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:hover:bg-amber-950/40 dark:text-amber-400 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5"
+                                                                        >
+                                                                            <Wrench className="w-3.5 h-3.5" />
+                                                                            Lapor Rusak
+                                                                        </button>
+                                                                        {asset.jenis_aset === 'loanable' && (
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    simlabLoanForm.setData('aset_id', asset.id);
+                                                                                    setSimlabActiveSubTab('loan');
+                                                                                }}
+                                                                                className="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 dark:text-indigo-400 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5"
+                                                                            >
+                                                                                <BookOpen className="w-3.5 h-3.5" />
+                                                                                Pinjam
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/20 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+                                                            <Server className="w-10 h-10 mx-auto text-gray-400 mb-3 animate-pulse" />
+                                                            <p className="font-bold text-sm">Tidak Ada Aset Ditemukan</p>
+                                                            <p className="text-xs text-gray-400 mt-1">Coba sesuaikan filter pencarian laboratorium atau kondisi Anda.</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Content: Add Asset Form */}
+                                        {simlabActiveSubTab === 'add_asset' && (
+                                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm max-w-3xl">
+                                                <h3 className="text-lg font-bold text-gray-850 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
+                                                    <PlusCircle className="w-5 h-5 text-indigo-500" />
+                                                    Tambah Aset Baru ke SIMLAB
+                                                </h3>
+                                                <form onSubmit={submitSimlabAsset} className="space-y-4">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Laboratorium Tujuan *
+                                                            </label>
+                                                            <select
+                                                                value={simlabAssetForm.data.laboratorium_id}
+                                                                onChange={e => simlabAssetForm.setData('laboratorium_id', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            >
+                                                                <option value="">Pilih Laboratorium</option>
+                                                                {simlabLabs.map(lab => (
+                                                                    <option key={lab.id} value={lab.id}>{lab.nama_lab}</option>
+                                                                ))}
+                                                            </select>
+                                                            {simlabAssetForm.errors.laboratorium_id && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.laboratorium_id}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Kode Aset (Harus Unik) *
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                value={simlabAssetForm.data.kode_aset}
+                                                                onChange={e => simlabAssetForm.setData('kode_aset', e.target.value)}
+                                                                placeholder="Contoh: LAB01-PC06"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            />
+                                                            {simlabAssetForm.errors.kode_aset && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.kode_aset}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Nama Aset *
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                value={simlabAssetForm.data.nama_aset}
+                                                                onChange={e => simlabAssetForm.setData('nama_aset', e.target.value)}
+                                                                placeholder="Contoh: PC Client - ASUS ROG"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            />
+                                                            {simlabAssetForm.errors.nama_aset && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.nama_aset}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Jenis Aset *
+                                                            </label>
+                                                            <select
+                                                                value={simlabAssetForm.data.jenis_aset}
+                                                                onChange={e => simlabAssetForm.setData('jenis_aset', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            >
+                                                                <option value="statis">Statis</option>
+                                                                <option value="consumable">Consumable</option>
+                                                                <option value="loanable">Loanable</option>
+                                                            </select>
+                                                            {simlabAssetForm.errors.jenis_aset && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.jenis_aset}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Kondisi Aset
+                                                            </label>
+                                                            <select
+                                                                value={simlabAssetForm.data.kondisi}
+                                                                onChange={e => simlabAssetForm.setData('kondisi', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            >
+                                                                <option value="baik">Baik</option>
+                                                                <option value="rusak_ringan">Rusak Ringan</option>
+                                                                <option value="rusak_berat">Rusak Berat</option>
+                                                            </select>
+                                                            {simlabAssetForm.errors.kondisi && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.kondisi}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Jumlah Stok
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min="1"
+                                                                value={simlabAssetForm.data.stok}
+                                                                onChange={e => simlabAssetForm.setData('stok', parseInt(e.target.value) || 1)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            />
+                                                            {simlabAssetForm.errors.stok && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.stok}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Posisi Meja (Optional)
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min="1"
+                                                                value={simlabAssetForm.data.posisi_meja}
+                                                                onChange={e => simlabAssetForm.setData('posisi_meja', e.target.value)}
+                                                                placeholder="Contoh: 6"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            />
+                                                            {simlabAssetForm.errors.posisi_meja && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.posisi_meja}</p>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="p-4 bg-gray-50/50 dark:bg-gray-900/40 rounded-xl border border-gray-150 dark:border-gray-800 mt-2">
+                                                        <h4 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-3">Spesifikasi Detail (Opsional)</h4>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Processor / CPU</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={simlabAssetForm.data.spesifikasi.cpu}
+                                                                    onChange={e => simlabAssetForm.setData('spesifikasi', { ...simlabAssetForm.data.spesifikasi, cpu: e.target.value })}
+                                                                    placeholder="Contoh: Intel Core i7"
+                                                                    className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Memory / RAM</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={simlabAssetForm.data.spesifikasi.ram}
+                                                                    onChange={e => simlabAssetForm.setData('spesifikasi', { ...simlabAssetForm.data.spesifikasi, ram: e.target.value })}
+                                                                    placeholder="Contoh: 16GB"
+                                                                    className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex justify-end pt-3 gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSimlabActiveSubTab('list')}
+                                                            className="px-6 py-2.5 bg-gray-100 hover:bg-gray-250 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-bold"
+                                                        >
+                                                            Batal
+                                                        </button>
+                                                        <button
+                                                            type="submit"
+                                                            disabled={simlabAssetForm.processing}
+                                                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-100 dark:shadow-none"
+                                                        >
+                                                            {simlabAssetForm.processing ? 'Menyimpan...' : 'Simpan Aset'}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Content: Report Ticket Form */}
+                                        {simlabActiveSubTab === 'ticket' && (
+                                            <div className="bg-white dark:bg-gray-805 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm max-w-xl">
+                                                <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
+                                                    <Wrench className="w-5 h-5 text-amber-500" />
+                                                    Lapor Kerusakan Aset (Tiket)
+                                                </h3>
+                                                {simlabTicketForm.data.aset_id && (
+                                                    <div className="p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 rounded-xl text-xs font-medium mb-4 flex items-center justify-between">
+                                                        <span>Melaporkan kerusakan untuk Aset ID #{simlabTicketForm.data.aset_id}</span>
+                                                        <button type="button" onClick={() => simlabTicketForm.setData('aset_id', '')} className="text-amber-500 hover:text-amber-700 font-bold underline">Ubah Aset</button>
+                                                    </div>
+                                                )}
+                                                <form onSubmit={submitSimlabTicket} className="space-y-4">
+                                                    {!simlabTicketForm.data.aset_id && (
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Pilih Aset Yang Rusak *
+                                                            </label>
+                                                            <select
+                                                                value={simlabTicketForm.data.aset_id}
+                                                                onChange={e => simlabTicketForm.setData('aset_id', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            >
+                                                                <option value="">Pilih Aset</option>
+                                                                {simlabAssets.map(asset => (
+                                                                    <option key={asset.id} value={asset.id}>{asset.kode_aset} - {asset.nama_aset}</option>
+                                                                ))}
+                                                            </select>
+                                                            {simlabTicketForm.errors.aset_id && <p className="text-xs text-rose-500 mt-1">{simlabTicketForm.errors.aset_id}</p>}
+                                                        </div>
+                                                    )}
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                            Nama Pelapor *
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={simlabTicketForm.data.nama_pelapor}
+                                                            onChange={e => simlabTicketForm.setData('nama_pelapor', e.target.value)}
+                                                            placeholder="Nama Lengkap Anda"
+                                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            required
+                                                        />
+                                                        {simlabTicketForm.errors.nama_pelapor && <p className="text-xs text-rose-500 mt-1">{simlabTicketForm.errors.nama_pelapor}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                            Email Pelapor (Opsional)
+                                                        </label>
+                                                        <input
+                                                            type="email"
+                                                            value={simlabTicketForm.data.email_pelapor}
+                                                            onChange={e => simlabTicketForm.setData('email_pelapor', e.target.value)}
+                                                            placeholder="nama@domain.com"
+                                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                        />
+                                                        {simlabTicketForm.errors.email_pelapor && <p className="text-xs text-rose-500 mt-1">{simlabTicketForm.errors.email_pelapor}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                            Deskripsi Detail Kerusakan *
+                                                        </label>
+                                                        <textarea
+                                                            value={simlabTicketForm.data.deskripsi_kerusakan}
+                                                            onChange={e => simlabTicketForm.setData('deskripsi_kerusakan', e.target.value)}
+                                                            placeholder="Tuliskan spesifikasi/gejala kerusakan secara mendetail..."
+                                                            rows="4"
+                                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            required
+                                                        ></textarea>
+                                                        {simlabTicketForm.errors.deskripsi_kerusakan && <p className="text-xs text-rose-500 mt-1">{simlabTicketForm.errors.deskripsi_kerusakan}</p>}
+                                                    </div>
+
+                                                    <div className="flex justify-end pt-3 gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                simlabTicketForm.setData('aset_id', '');
+                                                                setSimlabActiveSubTab('list');
+                                                            }}
+                                                            className="px-6 py-2.5 bg-gray-100 hover:bg-gray-250 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-bold"
+                                                        >
+                                                            Batal
+                                                        </button>
+                                                        <button
+                                                            type="submit"
+                                                            disabled={simlabTicketForm.processing}
+                                                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-100 dark:shadow-none"
+                                                        >
+                                                            {simlabTicketForm.processing ? 'Mengirim...' : 'Kirim Laporan'}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Content: Loan Asset Form */}
+                                        {simlabActiveSubTab === 'loan' && (
+                                            <div className="bg-white dark:bg-gray-805 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm max-w-xl">
+                                                <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
+                                                    <BookOpen className="w-5 h-5 text-indigo-500" />
+                                                    Form Permintaan Peminjaman Aset
+                                                </h3>
+                                                {simlabLoanForm.data.aset_id && (
+                                                    <div className="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-800 dark:text-indigo-300 rounded-xl text-xs font-medium mb-4 flex items-center justify-between">
+                                                        <span>Meminjam Aset ID #{simlabLoanForm.data.aset_id}</span>
+                                                        <button type="button" onClick={() => simlabLoanForm.setData('aset_id', '')} className="text-indigo-500 hover:text-indigo-700 font-bold underline">Ubah Aset</button>
+                                                    </div>
+                                                )}
+                                                <form onSubmit={submitSimlabLoan} className="space-y-4">
+                                                    {!simlabLoanForm.data.aset_id && (
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Pilih Aset Peminjaman *
+                                                            </label>
+                                                            <select
+                                                                value={simlabLoanForm.data.aset_id}
+                                                                onChange={e => simlabLoanForm.setData('aset_id', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            >
+                                                                <option value="">Pilih Aset</option>
+                                                                {simlabAssets.filter(a => a.jenis_aset === 'loanable').map(asset => (
+                                                                    <option key={asset.id} value={asset.id}>{asset.kode_aset} - {asset.nama_aset} (Stok: {asset.stok})</option>
+                                                                ))}
+                                                            </select>
+                                                            {simlabLoanForm.errors.aset_id && <p className="text-xs text-rose-500 mt-1">{simlabLoanForm.errors.aset_id}</p>}
+                                                        </div>
+                                                    )}
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                            Email Peminjam *
+                                                        </label>
+                                                        <input
+                                                            type="email"
+                                                            value={simlabLoanForm.data.email_peminjam}
+                                                            onChange={e => simlabLoanForm.setData('email_peminjam', e.target.value)}
+                                                            placeholder="peminjam@domain.com"
+                                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            required
+                                                        />
+                                                        {simlabLoanForm.errors.email_peminjam && <p className="text-xs text-rose-500 mt-1">{simlabLoanForm.errors.email_peminjam}</p>}
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                            Jumlah *
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            value={simlabLoanForm.data.jumlah}
+                                                            onChange={e => simlabLoanForm.setData('jumlah', parseInt(e.target.value) || 1)}
+                                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            required
+                                                        />
+                                                        {simlabLoanForm.errors.jumlah && <p className="text-xs text-rose-500 mt-1">{simlabLoanForm.errors.jumlah}</p>}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Tanggal Pinjam *
+                                                            </label>
+                                                            <input
+                                                                type="date"
+                                                                value={simlabLoanForm.data.tanggal_pinjam}
+                                                                onChange={e => simlabLoanForm.setData('tanggal_pinjam', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            />
+                                                            {simlabLoanForm.errors.tanggal_pinjam && <p className="text-xs text-rose-500 mt-1">{simlabLoanForm.errors.tanggal_pinjam}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Rencana Tanggal Kembali *
+                                                            </label>
+                                                            <input
+                                                                type="date"
+                                                                value={simlabLoanForm.data.tanggal_kembali_rencana}
+                                                                onChange={e => simlabLoanForm.setData('tanggal_kembali_rencana', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            />
+                                                            {simlabLoanForm.errors.tanggal_kembali_rencana && <p className="text-xs text-rose-500 mt-1">{simlabLoanForm.errors.tanggal_kembali_rencana}</p>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                            Catatan Peminjaman (Opsional)
+                                                        </label>
+                                                        <textarea
+                                                            value={simlabLoanForm.data.catatan}
+                                                            onChange={e => simlabLoanForm.setData('catatan', e.target.value)}
+                                                            placeholder="Contoh: Untuk keperluan praktikum instalasi jaringan..."
+                                                            rows="3"
+                                                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                        ></textarea>
+                                                        {simlabLoanForm.errors.catatan && <p className="text-xs text-rose-500 mt-1">{simlabLoanForm.errors.catatan}</p>}
+                                                    </div>
+
+                                                    <div className="flex justify-end pt-3 gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                simlabLoanForm.setData('aset_id', '');
+                                                                setSimlabActiveSubTab('list');
+                                                            }}
+                                                            className="px-6 py-2.5 bg-gray-100 hover:bg-gray-250 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-bold"
+                                                        >
+                                                            Batal
+                                                        </button>
+                                                        <button
+                                                            type="submit"
+                                                            disabled={simlabLoanForm.processing}
+                                                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-100 dark:shadow-none"
+                                                        >
+                                                            {simlabLoanForm.processing ? 'Mengirim...' : 'Kirim Peminjaman'}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* ================= TAB: USER MANAGEMENT (ADMIN ONLY) ================= */}
                                 {activeTab === 'users' && user.role === 'admin' && (

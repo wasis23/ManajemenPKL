@@ -81,6 +81,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/agendas/{agenda}', [AgendaController::class, 'update'])->name('agendas.update');
         Route::delete('/agendas/{agenda}', [AgendaController::class, 'destroy'])->name('agendas.destroy');
     });
+
+    // SIMLAB Integration Routes
+    Route::post('/simlab/assets', [\App\Http\Controllers\SimlabController::class, 'storeAsset'])->name('simlab.assets.store');
+    Route::post('/simlab/tickets', [\App\Http\Controllers\SimlabController::class, 'storeTicket'])->name('simlab.tickets.store');
+    Route::post('/simlab/loans', [\App\Http\Controllers\SimlabController::class, 'storeLoan'])->name('simlab.loans.store');
 });
 
 require __DIR__.'/auth.php';
