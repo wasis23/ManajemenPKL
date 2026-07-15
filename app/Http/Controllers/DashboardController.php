@@ -164,19 +164,8 @@ class DashboardController extends Controller
             }
         }
 
-        // Calculate available PKL students count for task submission section
-        $totalStudentsCount = User::where('role', 'anak_pkl')->count();
-        $absentPermitsCount = Permission::where('date', $today)
-            ->where('type', 'tidak_masuk')
-            ->where('status', 'approved')
-            ->count();
-        $activeStudentsCount = \DB::table('task_user')
-            ->join('tasks', 'task_user.task_id', '=', 'tasks.id')
-            ->whereIn('tasks.status', ['pending', 'proses'])
-            ->distinct('task_user.user_id')
-            ->count('task_user.user_id');
-
-        $availableStudentsCount = max(0, $totalStudentsCount - $absentPermitsCount - $activeStudentsCount);
+        // Calculate available PKL students count for task submission section by campus
+        $availableStudentsCount = User::getAvailableStudentsCountByCampus($today);
 
         $agendas = \App\Models\Agenda::with('creator')->orderBy('date', 'desc')->orderBy('start_time', 'asc')->get();
 

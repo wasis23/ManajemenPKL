@@ -64,7 +64,7 @@ export default function PublicCreate({ availableStudentsCount }) {
                                 </p>
                             </div>
                             <div className="px-4 py-2 bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-bold rounded-xl shrink-0 self-start md:self-center">
-                                Siswa PKL Tersedia: {availableStudentsCount} orang
+                                Siswa PKL Tersedia: {availableStudentsCount[data.campus_type] ?? 0} orang
                             </div>
                         </div>
 

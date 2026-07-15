@@ -33,7 +33,7 @@ function getDistanceJS(lat1, lon1, lat2, lon2) {
     return R * c; // in meters
 }
 
-export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = 0, schools = [], agendas = [] }) {
+export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = {}, schools = [], agendas = [] }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
 
@@ -1908,7 +1908,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     Buat Laporan Tugas / Aduan Baru
                                                 </h3>
                                                 <div className="px-3 py-1 bg-teal-50 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900 text-teal-700 dark:text-teal-400 text-xs font-bold rounded-full">
-                                                    Siswa PKL Tersedia: {availableStudentsCount} orang
+                                                    Siswa PKL Tersedia: {availableStudentsCount[taskForm.data.campus_type] ?? 0} orang
                                                 </div>
                                             </div>
 
