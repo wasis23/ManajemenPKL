@@ -93,15 +93,20 @@ export default function Register({ schools = [] }) {
                 <div className="mt-4">
                     <InputLabel htmlFor="major" value="Jurusan Sekolah" />
 
-                    <TextInput
+                    <select
                         id="major"
                         name="major"
                         value={data.major}
-                        className="mt-1 block w-full"
-                        placeholder="Contoh: Rekayasa Perangkat Lunak, Multimedia"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
                         onChange={(e) => setData('major', e.target.value)}
                         required
-                    />
+                    >
+                        <option value="">Pilih Jurusan</option>
+                        <option value="Akuntansi">Akuntansi</option>
+                        <option value="DKV">DKV</option>
+                        <option value="Perkantoran">Perkantoran</option>
+                        <option value="TKJ">TKJ</option>
+                    </select>
 
                     <InputError message={errors.major} className="mt-2" />
                 </div>

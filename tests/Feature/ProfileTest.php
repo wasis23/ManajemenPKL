@@ -43,6 +43,41 @@ class ProfileTest extends TestCase
         $this->assertNull($user->email_verified_at);
     }
 
+    public function test_anak_pkl_profile_information_can_be_updated(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'anak_pkl',
+            'school_name' => 'SMK Negeri 1',
+            'major' => 'TKJ',
+            'start_date' => '2026-07-01',
+            'end_date' => '2026-10-01',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => 'Anak PKL Updated',
+                'email' => 'pkl@example.com',
+                'school_name' => 'SMK Negeri 2',
+                'major' => 'DKV',
+                'start_date' => '2026-07-05',
+                'end_date' => '2026-10-05',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $user->refresh();
+
+        $this->assertSame('Anak PKL Updated', $user->name);
+        $this->assertSame('pkl@example.com', $user->email);
+        $this->assertSame('SMK Negeri 2', $user->school_name);
+        $this->assertSame('DKV', $user->major);
+        $this->assertSame('2026-07-05', $user->start_date);
+        $this->assertSame('2026-10-05', $user->end_date);
+    }
+
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
         $user = User::factory()->create();

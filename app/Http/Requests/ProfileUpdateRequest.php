@@ -30,6 +30,7 @@ class ProfileUpdateRequest extends FormRequest
 
         if ($this->user()->role === 'anak_pkl') {
             $rules['school_name'] = ['required', 'string', 'max:255'];
+            $rules['major'] = ['required', 'string', 'max:255'];
             $rules['start_date'] = ['required', 'date'];
             $rules['end_date'] = ['required', 'date', 'after_or_equal:start_date'];
         }

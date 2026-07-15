@@ -2425,14 +2425,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                 </div>
                                                                 <div className="sm:col-span-2">
                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jurusan Sekolah</label>
-                                                                    <input
-                                                                        type="text"
+                                                                    <select
                                                                         value={userForm.data.major}
                                                                         onChange={e => userForm.setData('major', e.target.value)}
-                                                                        placeholder="Contoh: Rekayasa Perangkat Lunak, Multimedia"
                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
                                                                         required
-                                                                    />
+                                                                    >
+                                                                        <option value="">Pilih Jurusan</option>
+                                                                        <option value="Akuntansi">Akuntansi</option>
+                                                                        <option value="DKV">DKV</option>
+                                                                        <option value="Perkantoran">Perkantoran</option>
+                                                                        <option value="TKJ">TKJ</option>
+                                                                    </select>
                                                                 </div>
                                                                 <div>
                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. WhatsApp</label>
@@ -2623,16 +2627,23 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                       </select>
                                                                  </div>
                                                                  <div className="sm:col-span-2">
-                                                                     <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jurusan Sekolah</label>
-                                                                     <input
-                                                                         type="text"
-                                                                         value={editUserForm.data.major}
-                                                                         onChange={e => editUserForm.setData('major', e.target.value)}
-                                                                         placeholder="Contoh: Rekayasa Perangkat Lunak, Multimedia"
-                                                                         className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
-                                                                         required
-                                                                     />
-                                                                 </div>
+                                                                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jurusan Sekolah</label>
+                                                                      <select
+                                                                          value={editUserForm.data.major}
+                                                                          onChange={e => editUserForm.setData('major', e.target.value)}
+                                                                          className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl text-sm dark:text-white"
+                                                                          required
+                                                                      >
+                                                                          <option value="">Pilih Jurusan</option>
+                                                                          <option value="Akuntansi">Akuntansi</option>
+                                                                          <option value="DKV">DKV</option>
+                                                                          <option value="Perkantoran">Perkantoran</option>
+                                                                          <option value="TKJ">TKJ</option>
+                                                                          {editUserForm.data.major && !['Akuntansi', 'DKV', 'Perkantoran', 'TKJ'].includes(editUserForm.data.major) && (
+                                                                              <option value={editUserForm.data.major}>{editUserForm.data.major}</option>
+                                                                          )}
+                                                                      </select>
+                                                                  </div>
                                                                  <div>
                                                                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. WhatsApp</label>
                                                                      <input

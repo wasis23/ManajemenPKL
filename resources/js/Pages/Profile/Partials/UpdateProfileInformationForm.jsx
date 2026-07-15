@@ -18,6 +18,7 @@ export default function UpdateProfileInformation({
             name: user.name,
             email: user.email,
             school_name: user.school_name || '',
+            major: user.major || '',
             start_date: user.start_date || '',
             end_date: user.end_date || '',
         });
@@ -97,6 +98,29 @@ export default function UpdateProfileInformation({
                             </select>
 
                             <InputError className="mt-2" message={errors.school_name} />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="major" value="Jurusan Sekolah" />
+
+                            <select
+                                id="major"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-indigo-600 dark:focus:ring-indigo-600"
+                                value={data.major}
+                                onChange={(e) => setData('major', e.target.value)}
+                                required
+                            >
+                                <option value="">Pilih Jurusan</option>
+                                <option value="Akuntansi">Akuntansi</option>
+                                <option value="DKV">DKV</option>
+                                <option value="Perkantoran">Perkantoran</option>
+                                <option value="TKJ">TKJ</option>
+                                {data.major && !['Akuntansi', 'DKV', 'Perkantoran', 'TKJ'].includes(data.major) && (
+                                    <option value={data.major}>{data.major}</option>
+                                )}
+                            </select>
+
+                            <InputError className="mt-2" message={errors.major} />
                         </div>
 
                         <div>
