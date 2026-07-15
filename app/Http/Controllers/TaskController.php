@@ -26,7 +26,7 @@ class TaskController extends Controller
             $message = "{$title}\n\n";
             $message .= "📌 <b>Judul:</b> " . htmlspecialchars($task->title) . "\n";
             $message .= "📝 <b>Deskripsi:</b> " . htmlspecialchars($task->description) . "\n";
-            $message .= "📍 <b>Lokasi:</b> " . htmlspecialchars($task->target_room) . " (" . htmlspecialchars($task->campus_type) . ")\n";
+            $message .= "📍 <b>Lokasi:</b> " . htmlspecialchars($task->campus_type) . " - " . htmlspecialchars($task->target_room) . "\n";
             $message .= "👤 <b>Pengaju:</b> " . htmlspecialchars($task->requester_name) . "\n";
             $message .= "👥 <b>Kuota:</b> " . htmlspecialchars($task->quota) . " orang\n\n";
             
