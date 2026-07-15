@@ -124,10 +124,15 @@ export default function PublicList({ tasks = [] }) {
                                             <div className="space-y-4">
                                                 {/* Header card info */}
                                                 <div className="flex justify-between items-start gap-2">
-                                                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${currentStatus.bg} flex items-center gap-1`}>
-                                                        {currentStatus.icon}
-                                                        {currentStatus.label}
-                                                    </span>
+                                                    <div className="flex flex-col gap-1.5">
+                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${currentStatus.bg} flex items-center gap-1`}>
+                                                            {currentStatus.icon}
+                                                            {currentStatus.label}
+                                                        </span>
+                                                        <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-block self-start">
+                                                            Kuota: {task.quota} orang
+                                                        </span>
+                                                    </div>
                                                     <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
                                                         #{task.id}
                                                     </span>

@@ -274,6 +274,7 @@ class TaskController extends Controller
             'requester_name' => 'required|string|max:255',
             'target_room' => 'required|string|max:255',
             'campus_type' => 'required|string|in:Kampus 1,Kampus 2',
+            'quota' => 'required|integer|min:1',
         ]);
 
         $task = Task::create([
@@ -282,7 +283,7 @@ class TaskController extends Controller
             'requester_name' => $request->requester_name,
             'target_room' => $request->target_room,
             'campus_type' => $request->campus_type,
-            'quota' => 1,
+            'quota' => $request->quota,
             'status' => 'pending',
             'reporter_id' => null, // Publicly submitted task
         ]);

@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React from 'react';
-import { Compass, ArrowLeft, Send, MapPin, Building, User, FileText, ClipboardList } from 'lucide-react';
+import { Compass, ArrowLeft, Send, MapPin, Building, User, Users, FileText, ClipboardList } from 'lucide-react';
 
 export default function PublicCreate({ availableStudentsCount }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -9,6 +9,7 @@ export default function PublicCreate({ availableStudentsCount }) {
         requester_name: '',
         target_room: '',
         campus_type: 'Kampus 1',
+        quota: 1,
     });
 
     const handleSubmit = (e) => {
@@ -104,24 +105,24 @@ export default function PublicCreate({ availableStudentsCount }) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                {/* Title */}
-                                <div className="sm:col-span-1 space-y-2">
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                        <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                                        Judul Tugas / Laporan
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={data.title}
-                                        onChange={e => setData('title', e.target.value)}
-                                        className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-                                        placeholder="Contoh: Instalasi Kabel LAN Baru..."
-                                        required
-                                    />
-                                    {errors.title && <p className="text-xs text-rose-500">{errors.title}</p>}
-                                </div>
+                            {/* Title */}
+                            <div className="space-y-2">
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                                    Judul Tugas / Laporan
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.title}
+                                    onChange={e => setData('title', e.target.value)}
+                                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                                    placeholder="Contoh: Instalasi Kabel LAN Baru..."
+                                    required
+                                />
+                                {errors.title && <p className="text-xs text-rose-500">{errors.title}</p>}
+                            </div>
 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 {/* Campus Type */}
                                 <div className="space-y-2">
                                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -138,6 +139,24 @@ export default function PublicCreate({ availableStudentsCount }) {
                                         <option value="Kampus 2" className="bg-slate-950">Kampus 2</option>
                                     </select>
                                     {errors.campus_type && <p className="text-xs text-rose-500">{errors.campus_type}</p>}
+                                </div>
+
+                                {/* Quota / Jumlah Anak PKL */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                        <Users className="w-3.5 h-3.5 text-indigo-400" />
+                                        Jumlah Anak PKL yang Dibutuhkan
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={data.quota}
+                                        onChange={e => setData('quota', parseInt(e.target.value) || '')}
+                                        className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                                        placeholder="Contoh: 1, 2..."
+                                        min="1"
+                                        required
+                                    />
+                                    {errors.quota && <p className="text-xs text-rose-500">{errors.quota}</p>}
                                 </div>
                             </div>
 
