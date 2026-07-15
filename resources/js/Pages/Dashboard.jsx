@@ -2692,7 +2692,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                         {/* Tab Content: Add Asset Form */}
                                         {simlabActiveSubTab === 'add_asset' && (
-                                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm max-w-3xl">
+                                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm w-full">
                                                 <h3 className="text-lg font-bold text-gray-850 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
                                                     <PlusCircle className="w-5 h-5 text-indigo-500" />
                                                     Tambah Aset Baru ke SIMLAB
@@ -2858,7 +2858,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                         {/* Tab Content: Report Ticket Form */}
                                         {simlabActiveSubTab === 'ticket' && (
-                                            <div className="bg-white dark:bg-gray-805 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm max-w-xl">
+                                            <div className="bg-white dark:bg-gray-805 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm w-full">
                                                 <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
                                                     <Wrench className="w-5 h-5 text-amber-500" />
                                                     Lapor Kerusakan Aset (Tiket)
@@ -2959,7 +2959,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                         {/* Tab Content: Loan Asset Form */}
                                         {simlabActiveSubTab === 'loan' && (
-                                            <div className="bg-white dark:bg-gray-805 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm max-w-xl">
+                                            <div className="bg-white dark:bg-gray-805 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm w-full">
                                                 <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
                                                     <BookOpen className="w-5 h-5 text-indigo-500" />
                                                     Form Permintaan Peminjaman Aset
