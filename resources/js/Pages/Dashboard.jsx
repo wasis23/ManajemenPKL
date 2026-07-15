@@ -33,7 +33,7 @@ function getDistanceJS(lat1, lon1, lat2, lon2) {
     return R * c; // in meters
 }
 
-export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = {}, schools = [], agendas = [], simlabLabs = [], simlabAssets = [], simlabFilters = {} }) {
+export default function Dashboard({ settings, leaderboard, todayAttendance, tasks, attendances = [], permissions = [], availableStudentsCount = {}, schools = [], agendas = [], simlabLabs = [], simlabAssets = [], simlabFilters = {}, simlabError = null }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
 
@@ -2452,10 +2452,17 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 <div className="flex flex-wrap items-center justify-between gap-4">
                                                     <div>
                                                         <div className="flex items-center gap-2 mb-2">
-                                                            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                                                                <span className="w-2 h-2 rounded-full bg-emerald-450 animate-ping"></span>
-                                                                API Connected
-                                                            </span>
+                                                            {simlabError ? (
+                                                                <span className="bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                                                                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                                                    API Disconnected
+                                                                </span>
+                                                            ) : (
+                                                                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                                                                    <span className="w-2 h-2 rounded-full bg-emerald-450 animate-ping"></span>
+                                                                    API Connected
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
                                                             SIMLAB - Sistem Manajemen Laboratorium
@@ -2467,6 +2474,17 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {simlabError && (
+                                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-2xl p-4 flex gap-3 text-red-700 dark:text-red-300">
+                                                <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                                                <div>
+                                                    <h4 className="font-bold text-sm">Gagal Menghubungkan ke API SIMLAB</h4>
+                                                    <p className="text-xs mt-1 leading-relaxed opacity-90">{simlabError}</p>
+                                                    <p className="text-[10px] mt-2 opacity-75">Silakan periksa pengaturan SIMLAB_BASE_URL di file .env dan pastikan server PKL dapat menjangkau host SIMLAB.</p>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Sub Navigation Tabs */}
                                         <div className="bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-wrap gap-2">

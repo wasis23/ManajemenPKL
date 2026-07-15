@@ -21,7 +21,7 @@ class SimlabService
      */
     protected function request()
     {
-        return Http::timeout(5)->withHeaders([
+        return Http::withoutVerifying()->timeout(5)->withHeaders([
             'X-API-KEY' => $this->apiKey,
             'Accept' => 'application/json',
         ]);

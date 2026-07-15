@@ -209,6 +209,8 @@ class DashboardController extends Controller
                 'laboratorium_id' => $request->query('simlab_lab_id', ''),
                 'kondisi' => $request->query('simlab_kondisi', ''),
             ],
+            'simlabError' => (isset($labResponse['success']) && !$labResponse['success'] ? ($labResponse['message'] ?? 'Gagal mengambil data laboratorium.') : null) 
+                ?? (isset($assetResponse['success']) && !$assetResponse['success'] ? ($assetResponse['message'] ?? 'Gagal mengambil data aset.') : null),
         ]);
     }
 }
