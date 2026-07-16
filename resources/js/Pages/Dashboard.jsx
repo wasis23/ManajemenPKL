@@ -546,6 +546,21 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         }
     });
 
+    const [editingAsset, setEditingAsset] = useState(null);
+    const editAssetForm = useForm({
+        laboratorium_id: '',
+        kode_aset: '',
+        nama_aset: '',
+        jenis_aset: 'statis',
+        kondisi: 'baik',
+        stok: 1,
+        posisi_meja: '',
+        spesifikasi: {
+            cpu: '',
+            ram: ''
+        }
+    });
+
     const simlabTicketForm = useForm({
         aset_id: '',
         nama_pelapor: user ? user.name : '',
@@ -743,6 +758,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
             preserveScroll: true,
             onSuccess: () => {
                 simlabAssetForm.reset();
+                setSimlabActiveSubTab('list');
+            }
+        });
+    };
+
+    const submitSimlabAssetEdit = (e) => {
+        e.preventDefault();
+        editAssetForm.put(route('simlab.assets.update', editingAsset.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                editAssetForm.reset();
+                setEditingAsset(null);
                 setSimlabActiveSubTab('list');
             }
         });
@@ -2532,6 +2559,14 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 <BookOpen className="w-4 h-4" />
                                                 Form Peminjaman
                                             </button>
+                                            {simlabActiveSubTab === 'edit_asset' && (
+                                                <button
+                                                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-indigo-650 text-white shadow-md transition-all"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                    Edit Aset
+                                                </button>
+                                            )}
                                         </div>
 
                                         {/* Tab Content: List Aset & Lab */}
@@ -2652,7 +2687,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                             )}
                                                                         </div>
                                                                     </div>
-                                                                    <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-805 mt-2">
+                                                                    <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-850 mt-2">
                                                                         <button
                                                                             onClick={() => {
                                                                                 simlabTicketForm.setData('aset_id', asset.id);
@@ -2675,6 +2710,29 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                                 Pinjam
                                                                             </button>
                                                                         )}
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditingAsset(asset);
+                                                                                editAssetForm.setData({
+                                                                                    laboratorium_id: asset.laboratorium_id || '',
+                                                                                    kode_aset: asset.kode_aset || '',
+                                                                                    nama_aset: asset.nama_aset || '',
+                                                                                    jenis_aset: asset.jenis_aset || 'statis',
+                                                                                    kondisi: asset.kondisi || 'baik',
+                                                                                    stok: asset.stok || 1,
+                                                                                    posisi_meja: asset.posisi_meja || '',
+                                                                                    spesifikasi: {
+                                                                                        cpu: asset.spesifikasi?.cpu || '',
+                                                                                        ram: asset.spesifikasi?.ram || ''
+                                                                                    }
+                                                                                });
+                                                                                setSimlabActiveSubTab('edit_asset');
+                                                                            }}
+                                                                            className="flex-1 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 dark:bg-sky-950/20 dark:hover:bg-sky-950/40 dark:text-sky-400 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5"
+                                                                        >
+                                                                            <Pencil className="w-3.5 h-3.5" />
+                                                                            Edit
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             ))}
@@ -2850,6 +2908,176 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                             className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-100 dark:shadow-none"
                                                         >
                                                             {simlabAssetForm.processing ? 'Menyimpan...' : 'Simpan Aset'}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        )}
+
+                                        {/* Tab Content: Edit Asset Form */}
+                                        {simlabActiveSubTab === 'edit_asset' && editingAsset && (
+                                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm w-full">
+                                                <h3 className="text-lg font-bold text-gray-850 dark:text-white flex items-center gap-2 mb-4 border-b pb-3 dark:border-gray-700">
+                                                    <Pencil className="w-5 h-5 text-indigo-500" />
+                                                    Edit Aset: {editingAsset.nama_aset}
+                                                </h3>
+                                                <form onSubmit={submitSimlabAssetEdit} className="space-y-4">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Laboratorium Tujuan *
+                                                            </label>
+                                                            <select
+                                                                value={editAssetForm.data.laboratorium_id}
+                                                                onChange={e => editAssetForm.setData('laboratorium_id', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            >
+                                                                <option value="">Pilih Laboratorium</option>
+                                                                {simlabLabs.map(lab => (
+                                                                    <option key={lab.id} value={lab.id}>{lab.nama_lab}</option>
+                                                                ))}
+                                                            </select>
+                                                            {editAssetForm.errors.laboratorium_id && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.laboratorium_id}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Kode Aset (Harus Unik) *
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                value={editAssetForm.data.kode_aset}
+                                                                onChange={e => editAssetForm.setData('kode_aset', e.target.value)}
+                                                                placeholder="Contoh: LAB01-PC06"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            />
+                                                            {editAssetForm.errors.kode_aset && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.kode_aset}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Nama Aset *
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                value={editAssetForm.data.nama_aset}
+                                                                onChange={e => editAssetForm.setData('nama_aset', e.target.value)}
+                                                                placeholder="Contoh: PC Client - ASUS ROG"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            />
+                                                            {editAssetForm.errors.nama_aset && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.nama_aset}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Jenis Aset *
+                                                            </label>
+                                                            <select
+                                                                value={editAssetForm.data.jenis_aset}
+                                                                onChange={e => editAssetForm.setData('jenis_aset', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                required
+                                                            >
+                                                                <option value="statis">Statis</option>
+                                                                <option value="consumable">Consumable</option>
+                                                                <option value="loanable">Loanable</option>
+                                                            </select>
+                                                            {editAssetForm.errors.jenis_aset && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.jenis_aset}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Kondisi Aset
+                                                            </label>
+                                                            <select
+                                                                value={editAssetForm.data.kondisi}
+                                                                onChange={e => editAssetForm.setData('kondisi', e.target.value)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            >
+                                                                <option value="baik">Baik</option>
+                                                                <option value="rusak_ringan">Rusak Ringan</option>
+                                                                <option value="rusak_berat">Rusak Berat</option>
+                                                            </select>
+                                                            {editAssetForm.errors.kondisi && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.kondisi}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Jumlah Stok
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                value={editAssetForm.data.stok}
+                                                                onChange={e => editAssetForm.setData('stok', parseInt(e.target.value) >= 0 ? parseInt(e.target.value) : 0)}
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            />
+                                                            {editAssetForm.errors.stok && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.stok}</p>}
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                                Posisi Meja (Optional)
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min="1"
+                                                                value={editAssetForm.data.posisi_meja}
+                                                                onChange={e => editAssetForm.setData('posisi_meja', e.target.value)}
+                                                                placeholder="Contoh: 6"
+                                                                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                            />
+                                                            {editAssetForm.errors.posisi_meja && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.posisi_meja}</p>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="p-4 bg-gray-50/50 dark:bg-gray-900/40 rounded-xl border border-gray-150 dark:border-gray-800 mt-2">
+                                                        <h4 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-3">Spesifikasi Detail (Opsional)</h4>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Processor / CPU</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={editAssetForm.data.spesifikasi.cpu}
+                                                                    onChange={e => editAssetForm.setData('spesifikasi', { ...editAssetForm.data.spesifikasi, cpu: e.target.value })}
+                                                                    placeholder="Contoh: Intel Core i7"
+                                                                    className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Memory / RAM</label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={editAssetForm.data.spesifikasi.ram}
+                                                                    onChange={e => editAssetForm.setData('spesifikasi', { ...editAssetForm.data.spesifikasi, ram: e.target.value })}
+                                                                    placeholder="Contoh: 16GB"
+                                                                    className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex justify-end pt-3 gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                editAssetForm.reset();
+                                                                setEditingAsset(null);
+                                                                setSimlabActiveSubTab('list');
+                                                            }}
+                                                            className="px-6 py-2.5 bg-gray-100 hover:bg-gray-250 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-bold"
+                                                        >
+                                                            Batal
+                                                        </button>
+                                                        <button
+                                                            type="submit"
+                                                            disabled={editAssetForm.processing}
+                                                            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-100 dark:shadow-none"
+                                                        >
+                                                            {editAssetForm.processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                                                         </button>
                                                     </div>
                                                 </form>

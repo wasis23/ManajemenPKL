@@ -84,6 +84,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // SIMLAB Integration Routes
     Route::post('/simlab/assets', [\App\Http\Controllers\SimlabController::class, 'storeAsset'])->name('simlab.assets.store');
+    Route::put('/simlab/assets/{id}', [\App\Http\Controllers\SimlabController::class, 'updateAsset'])->name('simlab.assets.update');
     Route::post('/simlab/tickets', [\App\Http\Controllers\SimlabController::class, 'storeTicket'])->name('simlab.tickets.store');
     Route::post('/simlab/loans', [\App\Http\Controllers\SimlabController::class, 'storeLoan'])->name('simlab.loans.store');
 });

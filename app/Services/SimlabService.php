@@ -73,6 +73,22 @@ class SimlabService
     }
 
     /**
+     * Update an existing asset.
+     * URL: PUT /asets/{id}
+     */
+    public function updateAset($id, array $payload)
+    {
+        try {
+            $response = $this->request()->put("{$this->baseUrl}/asets/{$id}", $payload);
+            return $response->json();
+        } catch (\Exception $e) {
+            Log::error("SIMLAB API Error (updateAset): " . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+
+    /**
      * Create a new damage report/ticket.
      * URL: POST /tickets
      */

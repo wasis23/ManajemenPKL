@@ -46,7 +46,53 @@ class SimlabController extends Controller
             return back()->with('success', 'Aset baru berhasil ditambahkan ke SIMLAB.');
         }
 
+        if (isset($response['errors']) && is_array($response['errors'])) {
+            throw \Illuminate\Validation\ValidationException::withMessages($response['errors']);
+        }
+
         $errorMessage = $response['message'] ?? 'Gagal menambahkan aset ke SIMLAB.';
+        return back()->with('error', $errorMessage);
+    }
+
+    /**
+     * Update an asset in SIMLAB.
+     */
+    public function updateAsset(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'laboratorium_id' => 'sometimes|integer',
+            'kode_aset' => 'sometimes|string',
+            'nama_aset' => 'sometimes|string',
+            'jenis_aset' => 'sometimes|in:statis,consumable,loanable',
+            'kondisi' => 'sometimes|nullable|in:baik,rusak_ringan,rusak_berat',
+            'stok' => 'sometimes|nullable|integer|min:0',
+            'posisi_meja' => 'sometimes|nullable|integer|min:1',
+            'spesifikasi' => 'sometimes|nullable|array',
+            'spesifikasi.cpu' => 'sometimes|nullable|string',
+            'spesifikasi.ram' => 'sometimes|nullable|string',
+        ]);
+
+        // Clean up empty fields in spesifikasi
+        if (isset($validated['spesifikasi'])) {
+            $validated['spesifikasi'] = array_filter($validated['spesifikasi']);
+            if (empty($validated['spesifikasi'])) {
+                unset($validated['spesifikasi']);
+            }
+        }
+
+        $payload = array_filter($validated, fn($value) => !is_null($value));
+
+        $response = $this->simlabService->updateAset($id, $payload);
+
+        if (isset($response['success']) && $response['success']) {
+            return back()->with('success', 'Aset berhasil diperbarui di SIMLAB.');
+        }
+
+        if (isset($response['errors']) && is_array($response['errors'])) {
+            throw \Illuminate\Validation\ValidationException::withMessages($response['errors']);
+        }
+
+        $errorMessage = $response['message'] ?? 'Gagal memperbarui aset di SIMLAB.';
         return back()->with('error', $errorMessage);
     }
 
