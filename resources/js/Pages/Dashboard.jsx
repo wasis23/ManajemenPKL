@@ -536,7 +536,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         laboratorium_id: '',
         kode_aset: '',
         nama_aset: '',
-        jenis_aset: 'statis',
+        jenis_aset: 'PC',
         kondisi: 'baik',
         stok: 1,
         posisi_meja: '',
@@ -551,7 +551,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         laboratorium_id: '',
         kode_aset: '',
         nama_aset: '',
-        jenis_aset: 'statis',
+        jenis_aset: 'PC',
         kondisi: 'baik',
         stok: 1,
         posisi_meja: '',
@@ -2661,7 +2661,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                         </h4>
                                                                         <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 mb-4">
                                                                             <p className="flex justify-between">
-                                                                                <span>Jenis Aset:</span>
+                                                                                <span>Kategori Aset:</span>
                                                                                 <span className="font-semibold text-gray-700 dark:text-gray-300 capitalize">{asset.jenis_aset}</span>
                                                                             </p>
                                                                             <p className="flex justify-between">
@@ -2698,7 +2698,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                             <Wrench className="w-3.5 h-3.5" />
                                                                             Lapor Rusak
                                                                         </button>
-                                                                        {asset.jenis_aset === 'loanable' && (
+                                                                        {asset.stok > 0 && (
                                                                             <button
                                                                                 onClick={() => {
                                                                                     simlabLoanForm.setData('aset_id', asset.id);
@@ -2717,7 +2717,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                                     laboratorium_id: asset.laboratorium_id || '',
                                                                                     kode_aset: asset.kode_aset || '',
                                                                                     nama_aset: asset.nama_aset || '',
-                                                                                    jenis_aset: asset.jenis_aset || 'statis',
+                                                                                    jenis_aset: asset.jenis_aset || 'PC',
                                                                                     kondisi: asset.kondisi || 'baik',
                                                                                     stok: asset.stok || 1,
                                                                                     posisi_meja: asset.posisi_meja || '',
@@ -2807,7 +2807,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                                         <div>
                                                             <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                                                Jenis Aset *
+                                                                Kategori Aset *
                                                             </label>
                                                             <select
                                                                 value={simlabAssetForm.data.jenis_aset}
@@ -2815,9 +2815,10 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
                                                                 required
                                                             >
-                                                                <option value="statis">Statis</option>
-                                                                <option value="consumable">Consumable</option>
-                                                                <option value="loanable">Loanable</option>
+                                                                <option value="PC">PC</option>
+                                                                <option value="Monitor">Monitor</option>
+                                                                <option value="Keyboard">Keyboard</option>
+                                                                <option value="Mouse">Mouse</option>
                                                             </select>
                                                             {simlabAssetForm.errors.jenis_aset && <p className="text-xs text-rose-500 mt-1">{simlabAssetForm.errors.jenis_aset}</p>}
                                                         </div>
@@ -2973,7 +2974,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
 
                                                         <div>
                                                             <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                                                Jenis Aset *
+                                                                Kategori Aset *
                                                             </label>
                                                             <select
                                                                 value={editAssetForm.data.jenis_aset}
@@ -2981,9 +2982,10 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                 className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
                                                                 required
                                                             >
-                                                                <option value="statis">Statis</option>
-                                                                <option value="consumable">Consumable</option>
-                                                                <option value="loanable">Loanable</option>
+                                                                <option value="PC">PC</option>
+                                                                <option value="Monitor">Monitor</option>
+                                                                <option value="Keyboard">Keyboard</option>
+                                                                <option value="Mouse">Mouse</option>
                                                             </select>
                                                             {editAssetForm.errors.jenis_aset && <p className="text-xs text-rose-500 mt-1">{editAssetForm.errors.jenis_aset}</p>}
                                                         </div>
@@ -3211,7 +3213,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                 required
                                                             >
                                                                 <option value="">Pilih Aset</option>
-                                                                {simlabAssets.filter(a => a.jenis_aset === 'loanable').map(asset => (
+                                                                {simlabAssets.filter(a => a.stok > 0).map(asset => (
                                                                     <option key={asset.id} value={asset.id}>{asset.kode_aset} - {asset.nama_aset} (Stok: {asset.stok})</option>
                                                                 ))}
                                                             </select>
