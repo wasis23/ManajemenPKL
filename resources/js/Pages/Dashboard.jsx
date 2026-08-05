@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, usePage, router } from '@inertiajs/react';
+import { Head, useForm, usePage, router, Link } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { 
   MapPin, Award, ClipboardList, Settings, Users, CheckCircle, AlertTriangle, 
@@ -1240,6 +1240,14 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 <Calendar className="w-5 h-5" />
                                                 Kelola Agenda
                                             </button>
+
+                                            <Link
+                                                href={route('top-students.index')}
+                                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50 transition-all"
+                                            >
+                                                <Trophy className="w-5 h-5 text-amber-500" />
+                                                Kelola PKL Terbaik
+                                            </Link>
 
                                             <button
                                                 onClick={() => setActiveTab('settings')}

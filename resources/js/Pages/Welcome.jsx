@@ -170,10 +170,14 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
 
                                     <div className="text-center pt-5 space-y-5">
                                         <div className="relative inline-block">
-                                            <div className="w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 p-1 shadow-2xl shadow-amber-500/30">
-                                                <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-4xl font-black text-amber-300">
-                                                    {topStudent.name?.charAt(0).toUpperCase()}
-                                                </div>
+                                            <div className="w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 p-1 shadow-2xl shadow-amber-500/30 overflow-hidden">
+                                                {topStudent.photo_path ? (
+                                                    <img src={topStudent.photo_path} alt={topStudent.name} className="w-full h-full rounded-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-4xl font-black text-amber-300">
+                                                        {topStudent.name?.charAt(0).toUpperCase()}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="absolute -bottom-2 -right-1 bg-amber-500 text-slate-950 p-2 rounded-full shadow-lg">
                                                 <Sparkles className="w-5 h-5 fill-slate-950 animate-spin-slow" />
@@ -182,7 +186,7 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
 
                                         <div className="space-y-1.5">
                                             <span className="inline-block px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold uppercase tracking-widest">
-                                                ⭐ Champion #1
+                                                ⭐ {topStudent.period ? `Periode ${topStudent.period}` : 'Champion #1'}
                                             </span>
                                             <h3 className="font-extrabold text-2xl text-white group-hover:text-amber-200 transition-colors line-clamp-1">{topStudent.name}</h3>
                                             <p className="text-sm text-slate-300 font-medium line-clamp-1">{topStudent.school_name || 'Peserta PKL'}</p>
@@ -190,6 +194,12 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
                                                 <p className="text-xs text-slate-400">Jurusan: {topStudent.major}</p>
                                             )}
                                         </div>
+
+                                        {topStudent.description && (
+                                            <p className="text-xs text-slate-300 italic bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                                                "{topStudent.description}"
+                                            </p>
+                                        )}
 
                                         <div className="p-4 bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/40 rounded-2xl border border-amber-500/30 flex items-center justify-between text-sm shadow-inner">
                                             <span className="text-slate-400 font-medium">Akumulasi Poin Kinerja</span>

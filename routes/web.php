@@ -12,7 +12,9 @@ use App\Http\Controllers\AgendaController;
 use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TopStudentController;
 use App\Models\Setting;
+use App\Models\TopStudent;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Schema;
 
@@ -25,9 +27,28 @@ Route::get('/', function () {
 
     $topStudent = null;
     if ($showTopStudent) {
-        $topStudent = User::where('role', 'anak_pkl')
-            ->orderBy('points', 'desc')
-            ->first(['id', 'name', 'points', 'school_name', 'major', 'social_media']);
+        if (Schema::hasTable('top_students')) {
+            $manualTop = TopStudent::where('is_active', true)->latest()->first();
+            if ($manualTop) {
+                $topStudent = [
+                    'id' => $manualTop->id,
+                    'name' => $manualTop->name,
+                    'school_name' => $manualTop->school_name,
+                    'major' => $manualTop->major,
+                    'period' => $manualTop->period,
+                    'points' => $manualTop->points,
+                    'description' => $manualTop->description,
+                    'photo_path' => $manualTop->photo_path,
+                ];
+            }
+        }
+
+        // Fallback to highest points user if no manual TopStudent active
+        if (!$topStudent) {
+            $topStudent = User::where('role', 'anak_pkl')
+                ->orderBy('points', 'desc')
+                ->first(['id', 'name', 'points', 'school_name', 'major', 'social_media']);
+        }
     }
 
     return Inertia::render('Welcome', [
@@ -87,6 +108,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/toggle-top-student', [SettingController::class, 'toggleTopStudent'])->name('settings.toggle-top-student');
+        
+        // Kelola PKL Terbaik Routes
+        Route::get('/top-students', [TopStudentController::class, 'index'])->name('top-students.index');
+        Route::post('/top-students', [TopStudentController::class, 'store'])->name('top-students.store');
+        Route::post('/top-students/{topStudent}', [TopStudentController::class, 'update'])->name('top-students.update');
+        Route::patch('/top-students/{topStudent}/toggle', [TopStudentController::class, 'toggleActive'])->name('top-students.toggle');
+        Route::delete('/top-students/{topStudent}', [TopStudentController::class, 'destroy'])->name('top-students.destroy');
         Route::post('/schools', [SchoolController::class, 'store'])->name('schools.store');
         Route::delete('/schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
