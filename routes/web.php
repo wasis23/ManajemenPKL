@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Models\Setting;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     $settings = Setting::first();
