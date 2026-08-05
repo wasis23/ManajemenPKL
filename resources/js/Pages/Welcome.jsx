@@ -49,35 +49,6 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
                 {/* Hero / Main Section */}
                 <main className="max-w-7xl mx-auto w-full px-6 py-12 flex-1 space-y-12">
                     
-                    {/* Hero Header */}
-                    <div className="text-center space-y-4 max-w-3xl mx-auto">
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white">
-                            Kelola Magang & Penugasan Dengan <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Presisi GPS</span>
-                        </h1>
-
-                        <p className="text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                            Aplikasi monitoring PKL yang memvalidasi absensi masuk/pulang harian menggunakan radar Geofencing 50 meter dan memotivasi kinerja dengan gamifikasi papan peringkat (leaderboard) berbasis tugas aduan.
-                        </p>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 text-left">
-                            <div className="p-4 bg-slate-900/60 border border-slate-900 rounded-xl space-y-2">
-                                <Compass className="w-6 h-6 text-indigo-400" />
-                                <h4 className="font-bold text-sm text-white">Radar 50m</h4>
-                                <p className="text-xs text-slate-500">Validasi presisi jarak koordinat di sisi server.</p>
-                            </div>
-                            <div className="p-4 bg-slate-900/60 border border-slate-900 rounded-xl space-y-2">
-                                <ClipboardList className="w-6 h-6 text-purple-400" />
-                                <h4 className="font-bold text-sm text-white">Tugas Aduan</h4>
-                                <p className="text-xs text-slate-500">Kuota pengambilan dinamis & upload bukti foto.</p>
-                            </div>
-                            <div className="p-4 bg-slate-900/60 border border-slate-900 rounded-xl space-y-2">
-                                <Trophy className="w-6 h-6 text-amber-400" />
-                                <h4 className="font-bold text-sm text-white">Leaderboard</h4>
-                                <p className="text-xs text-slate-500">Poin reward khusus tugas mandiri vs dibantu.</p>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Main Content Grid: Portal Akses Sistem (Left) & Hall of Fame & Award (Right) */}
                     <div className={`grid grid-cols-1 ${showTopStudent ? 'lg:grid-cols-2' : 'max-w-xl mx-auto'} gap-8 items-stretch`}>
                         
