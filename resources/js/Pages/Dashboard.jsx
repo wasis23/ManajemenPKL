@@ -5,7 +5,7 @@ import {
   MapPin, Award, ClipboardList, Settings, Users, CheckCircle, AlertTriangle, 
   Clock, Plus, Trash2, Camera, ShieldAlert, AwardIcon, Compass, RefreshCw,
   Trophy, HelpCircle, UserPlus, Star, ArrowRight, UploadCloud, Check, X, Pencil,
-  GraduationCap, Calendar, Database, Server, PlusCircle, Wrench, BookOpen
+  GraduationCap, Calendar, Database, Server, PlusCircle, Wrench, BookOpen, Image as ImageIcon
 } from 'lucide-react';
 import DevicePermissions from '@/Pages/Profile/Partials/DevicePermissions';
 
@@ -487,7 +487,9 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         telegram_bot_token: settings?.telegram_bot_token || '',
         telegram_chat_id: settings?.telegram_chat_id || '',
         telegram_channel_link: settings?.telegram_channel_link || '',
-        show_top_student: settings?.show_top_student !== undefined && settings?.show_top_student !== null ? Boolean(settings.show_top_student) : true
+        show_top_student: settings?.show_top_student !== undefined && settings?.show_top_student !== null ? Boolean(settings.show_top_student) : true,
+        hero_bg_image: null,
+        remove_hero_bg: false
     });
 
     const toggleTopStudentForm = useForm({});
@@ -865,6 +867,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
     const updateGeofenceSettings = (e) => {
         e.preventDefault();
         settingsForm.post(route('settings.update'), {
+            forceFormData: true,
             preserveScroll: true
         });
     };
@@ -2468,6 +2471,52 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     }`}>
                                                         Status: {settings?.show_top_student ?? true ? 'AKTIF (Tampil di Halaman Depan)' : 'NONAKTIF (Disembunyikan)'}
                                                     </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Hero Background Image Settings */}
+                                            <div className="p-4 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-200/60 dark:border-indigo-900/40 space-y-3 mb-4">
+                                                <div className="space-y-1">
+                                                    <h4 className="text-xs font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                        <ImageIcon className="w-4 h-4 text-indigo-500" />
+                                                        Background Image Hero Section (Halaman Depan)
+                                                    </h4>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                        Unggah gambar latar belakang kustom untuk bagian Hero Section landing page publik.
+                                                    </p>
+                                                </div>
+
+                                                {settings?.hero_bg_path && (
+                                                    <div className="relative rounded-xl overflow-hidden border border-indigo-200 dark:border-indigo-900 h-32 group">
+                                                        <img src={settings.hero_bg_path} alt="Hero Background Preview" className="w-full h-full object-cover" />
+                                                        <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    settingsForm.setData('remove_hero_bg', true);
+                                                                }}
+                                                                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow"
+                                                            >
+                                                                Hapus Background Saat Ini
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <div>
+                                                    <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                        Pilih Gambar Baru (JPG, PNG, WEBP, Max 5MB)
+                                                    </label>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={e => {
+                                                            settingsForm.setData('hero_bg_image', e.target.files[0]);
+                                                            settingsForm.setData('remove_hero_bg', false);
+                                                        }}
+                                                        className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-950 dark:file:text-indigo-300 hover:file:bg-indigo-100 cursor-pointer"
+                                                    />
+                                                    {settingsForm.errors.hero_bg_image && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.hero_bg_image}</p>}
                                                 </div>
                                             </div>
 

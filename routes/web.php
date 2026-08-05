@@ -20,9 +20,15 @@ use Illuminate\Support\Facades\Schema;
 
 Route::get('/', function () {
     $showTopStudent = true;
-    if (Schema::hasTable('settings') && Schema::hasColumn('settings', 'show_top_student')) {
+    $heroBgPath = null;
+    if (Schema::hasTable('settings')) {
         $settings = Setting::first();
-        $showTopStudent = (bool) ($settings?->show_top_student ?? true);
+        if (Schema::hasColumn('settings', 'show_top_student')) {
+            $showTopStudent = (bool) ($settings?->show_top_student ?? true);
+        }
+        if (Schema::hasColumn('settings', 'hero_bg_path')) {
+            $heroBgPath = $settings?->hero_bg_path;
+        }
     }
 
     $topStudent = null;
@@ -62,6 +68,7 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
         'topStudent' => $topStudent,
         'showTopStudent' => $showTopStudent,
+        'heroBgPath' => $heroBgPath,
         'tasks' => $tasks,
     ]);
 });

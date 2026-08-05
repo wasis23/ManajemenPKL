@@ -10,19 +10,24 @@ use Illuminate\Database\Schema\Blueprint;
 class SettingController extends Controller
 {
     /**
-     * Ensure show_top_student column exists on database table
+     * Ensure show_top_student & hero_bg_path columns exist on database table
      */
-    private function ensureShowTopStudentColumnExists()
+    private function ensureColumnsExist()
     {
         if (!Schema::hasColumn('settings', 'show_top_student')) {
             Schema::table('settings', function (Blueprint $table) {
                 $table->boolean('show_top_student')->default(true);
             });
         }
+        if (!Schema::hasColumn('settings', 'hero_bg_path')) {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->string('hero_bg_path')->nullable();
+            });
+        }
     }
 
     /**
-     * Update geofencing configurations (Admin only)
+     * Update geofencing configurations & Hero Background (Admin only)
      */
     public function update(Request $request)
     {
@@ -38,6 +43,8 @@ class SettingController extends Controller
             'telegram_chat_id' => 'nullable|string',
             'telegram_channel_link' => 'nullable|string',
             'show_top_student' => 'nullable|boolean',
+            'hero_bg_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'remove_hero_bg' => 'nullable|boolean',
         ]);
 
         $user = auth()->user();
@@ -45,7 +52,7 @@ class SettingController extends Controller
             return redirect()->back()->with('error', 'Hanya administrator yang dapat mengubah pengaturan.');
         }
 
-        $this->ensureShowTopStudentColumnExists();
+        $this->ensureColumnsExist();
 
         $settings = Setting::first() ?? new Setting();
         $settings->latitude = $request->latitude;
@@ -61,9 +68,29 @@ class SettingController extends Controller
         if ($request->has('show_top_student')) {
             $settings->show_top_student = (bool) $request->show_top_student;
         }
+
+        // Handle Background Image Reset/Delete
+        if ($request->boolean('remove_hero_bg')) {
+            if ($settings->hero_bg_path) {
+                $oldPath = str_replace('/storage/', '', $settings->hero_bg_path);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+                $settings->hero_bg_path = null;
+            }
+        }
+
+        // Handle New Background Image Upload
+        if ($request->hasFile('hero_bg_image')) {
+            if ($settings->hero_bg_path) {
+                $oldPath = str_replace('/storage/', '', $settings->hero_bg_path);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+            $bgPath = $request->file('hero_bg_image')->store('settings', 'public');
+            $settings->hero_bg_path = '/storage/' . $bgPath;
+        }
+
         $settings->save();
 
-        return redirect()->back()->with('success', 'Pengaturan geofencing, jam kerja, dan notifikasi Telegram berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Pengaturan geofencing, jam kerja, dan Hero Background berhasil diperbarui.');
     }
 
     /**
@@ -76,7 +103,7 @@ class SettingController extends Controller
             return redirect()->back()->with('error', 'Hanya administrator yang dapat mengubah pengaturan.');
         }
 
-        $this->ensureShowTopStudentColumnExists();
+        $this->ensureColumnsExist();
 
         $settings = Setting::first() ?? Setting::create([
             'latitude' => -7.2574719,

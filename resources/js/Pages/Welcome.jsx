@@ -2,7 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { Compass, Trophy, Shield, ArrowRight, Crown, Sparkles, Flame, MapPin, Activity, CheckCircle2, ClipboardList, Building, User, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 
-export default function Welcome({ auth, topStudent = null, showTopStudent = true, tasks = [] }) {
+export default function Welcome({ auth, topStudent = null, showTopStudent = true, tasks = [], heroBgPath = null }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
@@ -78,162 +78,177 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
                 {/* Main Content Layout */}
                 <main className="max-w-7xl mx-auto w-full px-6 pt-6 pb-16 flex-1 space-y-16 relative z-10">
                     
-                    {/* Top Hero Section: Portal Akses & Hall of Fame */}
-                    <div className={`grid grid-cols-1 ${showTopStudent ? 'lg:grid-cols-12' : 'max-w-3xl mx-auto'} gap-10 lg:gap-16 items-center`}>
+                    {/* Top Hero Section Container */}
+                    <div className="relative rounded-3xl overflow-hidden p-6 sm:p-10 lg:p-12 border border-slate-900/80 bg-slate-950/40 backdrop-blur-sm shadow-2xl">
                         
-                        {/* Portal Akses Sistem */}
-                        <div className={`${showTopStudent ? 'lg:col-span-6' : 'w-full'} space-y-6`}>
-                            
-                            <div className="space-y-3">
-                                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold tracking-wider uppercase">
-                                    <Shield className="w-4 h-4 text-indigo-400" />
-                                    <span>Portal Akses Sistem</span>
-                                </div>
-                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-                                    Presensi Real-time & <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">Manajemen Tugas Magang</span>
-                                </h1>
-                                <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
-                                    Silakan masuk ke akun Anda untuk mulai melakukan presensi berbasis lokasi atau mengelola tugas magang Anda.
-                                </p>
-                            </div>
-
-                            {/* Fluid Live Specs Indicator */}
-                            <div className="py-4 border-y border-slate-900 grid grid-cols-3 gap-4">
-                                <div className="space-y-1">
-                                    <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-1">
-                                        <MapPin className="w-3.5 h-3.5 text-emerald-400" /> Geofence
-                                    </div>
-                                    <div className="text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-1">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                        Radius 50m
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-1">
-                                        <Activity className="w-3.5 h-3.5 text-indigo-400" /> GPS Sensor
-                                    </div>
-                                    <div className="text-xs sm:text-sm font-bold text-indigo-300">
-                                        Akurasi ~5m
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-1">
-                                        <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" /> Toleransi
-                                    </div>
-                                    <div className="text-xs sm:text-sm font-bold text-amber-300">
-                                        60 Menit
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* CTA Action */}
-                            <div className="pt-2">
-                                {auth.user ? (
-                                    <Link
-                                        href={route('dashboard')}
-                                        className="inline-flex px-8 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white rounded-2xl text-base font-bold items-center justify-center gap-2 shadow-[0_0_30px_rgba(99,102,241,0.35)] hover:shadow-[0_0_45px_rgba(168,85,247,0.5)] transition-all duration-300 hover:-translate-y-0.5"
-                                    >
-                                        Masuk ke Dashboard <ArrowRight className="w-5 h-5" />
-                                    </Link>
-                                ) : (
-                                    <Link
-                                        href={route('tasks.public.create')}
-                                        className="inline-flex px-8 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-600 text-white rounded-2xl text-base font-bold items-center justify-center gap-2 shadow-[0_0_30px_rgba(99,102,241,0.35)] hover:shadow-[0_0_45px_rgba(99,102,241,0.5)] transition-all duration-300 hover:-translate-y-0.5"
-                                    >
-                                        Ajukan Tugas Baru <ArrowRight className="w-5 h-5" />
-                                    </Link>
-                                )}
-                            </div>
-
-                        </div>
-
-                        {/* Hall of Fame & Award */}
-                        {showTopStudent && (
-                            <div className="lg:col-span-6 relative flex flex-col justify-center">
-                                
-                                {/* Background Glow behind Spotlight */}
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/15 blur-[120px] pointer-events-none"></div>
-
-                                <div className="space-y-5 relative z-10">
-                                    <div className="space-y-2 text-left">
-                                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold tracking-wider uppercase">
-                                            <Trophy className="w-4 h-4 text-amber-400" />
-                                            <span>Hall of Fame & Award</span>
-                                        </div>
-                                        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                                            Student of the Month
-                                        </h2>
-                                        <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-lg">
-                                            Apresiasi tertinggi atas dedikasi kinerja luar biasa, kedisiplinan presensi, dan akumulasi poin terbanyak bagi peserta magang berprestasi.
-                                        </p>
-                                    </div>
-
-                                    {topStudent ? (
-                                        <div className="relative pt-2">
-                                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                                                
-                                                {/* Profile Photo */}
-                                                <div className="relative shrink-0">
-                                                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-200 p-1 shadow-[0_0_40px_rgba(245,158,11,0.3)] overflow-hidden">
-                                                        {topStudent.photo_path ? (
-                                                            <img src={topStudent.photo_path} alt={topStudent.name} className="w-full h-full rounded-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-4xl font-black text-amber-300">
-                                                                {topStudent.name?.charAt(0).toUpperCase()}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="absolute -bottom-1 -right-1 bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 p-2 rounded-full shadow-lg">
-                                                        <Crown className="w-4 h-4 sm:w-5 sm:h-5 fill-slate-950" />
-                                                    </div>
-                                                </div>
-
-                                                {/* Details */}
-                                                <div className="space-y-2 text-center sm:text-left flex-1">
-                                                    <div className="space-y-1">
-                                                        <span className="inline-block px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-extrabold uppercase tracking-wider">
-                                                            ⭐ {topStudent.period ? `Periode ${topStudent.period}` : 'Champion #1'}
-                                                        </span>
-                                                        <h3 className="text-xl sm:text-2xl font-black text-white bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
-                                                            {topStudent.name}
-                                                        </h3>
-                                                        <p className="text-xs sm:text-sm font-semibold text-slate-300">
-                                                            {topStudent.school_name || 'Peserta PKL'}
-                                                            {topStudent.major && <span className="text-slate-500"> • {topStudent.major}</span>}
-                                                        </p>
-                                                    </div>
-
-                                                    {topStudent.description && (
-                                                        <p className="text-xs text-slate-400 italic leading-relaxed">
-                                                            "{topStudent.description}"
-                                                        </p>
-                                                    )}
-
-                                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 font-bold text-xs sm:text-sm">
-                                                        <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-bounce" />
-                                                        <span>{topStudent.points} Poin Kinerja</span>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="py-4 space-y-1.5">
-                                            <div className="inline-flex items-center gap-2 text-amber-400 font-bold text-sm">
-                                                <Sparkles className="w-4 h-4" /> Papan Peringkat Sedang Berjalan
-                                            </div>
-                                            <p className="text-xs text-slate-500 leading-relaxed">
-                                                Tingkatkan penyelesaian tugas magang Anda untuk menjadi Student of the Month bulan ini!
-                                            </p>
-                                        </div>
-                                    )}
-
-                                </div>
-                            </div>
+                        {/* Custom Hero Background Image uploaded by Admin */}
+                        {heroBgPath && (
+                            <>
+                                <div 
+                                    className="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-105"
+                                    style={{ backgroundImage: `url(${heroBgPath})` }}
+                                ></div>
+                                <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px]"></div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/50"></div>
+                            </>
                         )}
 
+                        <div className={`relative z-10 grid grid-cols-1 ${showTopStudent ? 'lg:grid-cols-12' : 'max-w-3xl mx-auto'} gap-10 lg:gap-16 items-center`}>
+                            
+                            {/* Portal Akses Sistem */}
+                            <div className={`${showTopStudent ? 'lg:col-span-6' : 'w-full'} space-y-6`}>
+                                
+                                <div className="space-y-3">
+                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold tracking-wider uppercase">
+                                        <Shield className="w-4 h-4 text-indigo-400" />
+                                        <span>Portal Akses Sistem</span>
+                                    </div>
+                                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                                        Presensi Real-time & <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">Manajemen Tugas Magang</span>
+                                    </h1>
+                                    <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
+                                        Silakan masuk ke akun Anda untuk mulai melakukan presensi berbasis lokasi atau mengelola tugas magang Anda.
+                                    </p>
+                                </div>
+
+                                {/* Fluid Live Specs Indicator */}
+                                <div className="py-4 border-y border-slate-900 grid grid-cols-3 gap-4">
+                                    <div className="space-y-1">
+                                        <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-1">
+                                            <MapPin className="w-3.5 h-3.5 text-emerald-400" /> Geofence
+                                        </div>
+                                        <div className="text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-1">
+                                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            Radius 50m
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-1">
+                                            <Activity className="w-3.5 h-3.5 text-indigo-400" /> GPS Sensor
+                                        </div>
+                                        <div className="text-xs sm:text-sm font-bold text-indigo-300">
+                                            Akurasi ~5m
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider flex items-center gap-1">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" /> Toleransi
+                                        </div>
+                                        <div className="text-xs sm:text-sm font-bold text-amber-300">
+                                            60 Menit
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* CTA Action */}
+                                <div className="pt-2">
+                                    {auth.user ? (
+                                        <Link
+                                            href={route('dashboard')}
+                                            className="inline-flex px-8 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white rounded-2xl text-base font-bold items-center justify-center gap-2 shadow-[0_0_30px_rgba(99,102,241,0.35)] hover:shadow-[0_0_45px_rgba(168,85,247,0.5)] transition-all duration-300 hover:-translate-y-0.5"
+                                        >
+                                            Masuk ke Dashboard <ArrowRight className="w-5 h-5" />
+                                        </Link>
+                                    ) : (
+                                        <Link
+                                            href={route('tasks.public.create')}
+                                            className="inline-flex px-8 py-3.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-600 text-white rounded-2xl text-base font-bold items-center justify-center gap-2 shadow-[0_0_30px_rgba(99,102,241,0.35)] hover:shadow-[0_0_45px_rgba(99,102,241,0.5)] transition-all duration-300 hover:-translate-y-0.5"
+                                        >
+                                            Ajukan Tugas Baru <ArrowRight className="w-5 h-5" />
+                                        </Link>
+                                    )}
+                                </div>
+
+                            </div>
+
+                            {/* Hall of Fame & Award */}
+                            {showTopStudent && (
+                                <div className="lg:col-span-6 relative flex flex-col justify-center">
+                                    
+                                    {/* Background Glow behind Spotlight */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/15 blur-[120px] pointer-events-none"></div>
+
+                                    <div className="space-y-5 relative z-10">
+                                        <div className="space-y-2 text-left">
+                                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold tracking-wider uppercase">
+                                                <Trophy className="w-4 h-4 text-amber-400" />
+                                                <span>Hall of Fame & Award</span>
+                                            </div>
+                                            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                                Student of the Month
+                                            </h2>
+                                            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-lg">
+                                                Apresiasi tertinggi atas dedikasi kinerja luar biasa, kedisiplinan presensi, dan akumulasi poin terbanyak bagi peserta magang berprestasi.
+                                            </p>
+                                        </div>
+
+                                        {topStudent ? (
+                                            <div className="relative pt-2">
+                                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                                                    
+                                                    {/* Profile Photo */}
+                                                    <div className="relative shrink-0">
+                                                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-200 p-1 shadow-[0_0_40px_rgba(245,158,11,0.3)] overflow-hidden">
+                                                            {topStudent.photo_path ? (
+                                                                <img src={topStudent.photo_path} alt={topStudent.name} className="w-full h-full rounded-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-4xl font-black text-amber-300">
+                                                                    {topStudent.name?.charAt(0).toUpperCase()}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="absolute -bottom-1 -right-1 bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 p-2 rounded-full shadow-lg">
+                                                            <Crown className="w-4 h-4 sm:w-5 sm:h-5 fill-slate-950" />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Details */}
+                                                    <div className="space-y-2 text-center sm:text-left flex-1">
+                                                        <div className="space-y-1">
+                                                            <span className="inline-block px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-extrabold uppercase tracking-wider">
+                                                                ⭐ {topStudent.period ? `Periode ${topStudent.period}` : 'Champion #1'}
+                                                            </span>
+                                                            <h3 className="text-xl sm:text-2xl font-black text-white bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
+                                                                {topStudent.name}
+                                                            </h3>
+                                                            <p className="text-xs sm:text-sm font-semibold text-slate-300">
+                                                                {topStudent.school_name || 'Peserta PKL'}
+                                                                {topStudent.major && <span className="text-slate-500"> • {topStudent.major}</span>}
+                                                            </p>
+                                                        </div>
+
+                                                        {topStudent.description && (
+                                                            <p className="text-xs text-slate-400 italic leading-relaxed">
+                                                                "{topStudent.description}"
+                                                            </p>
+                                                        )}
+
+                                                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 font-bold text-xs sm:text-sm">
+                                                            <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-bounce" />
+                                                            <span>{topStudent.points} Poin Kinerja</span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="py-4 space-y-1.5">
+                                                <div className="inline-flex items-center gap-2 text-amber-400 font-bold text-sm">
+                                                    <Sparkles className="w-4 h-4" /> Papan Peringkat Sedang Berjalan
+                                                </div>
+                                                <p className="text-xs text-slate-500 leading-relaxed">
+                                                    Tingkatkan penyelesaian tugas magang Anda untuk menjadi Student of the Month bulan ini!
+                                                </p>
+                                            </div>
+                                        )}
+
+                                    </div>
+                                </div>
+                            )}
+
+                        </div>
                     </div>
 
                     {/* Bottom Section: Integrated Live Task List */}
