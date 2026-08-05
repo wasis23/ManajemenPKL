@@ -24,6 +24,11 @@ class SettingController extends Controller
                 $table->string('hero_bg_path')->nullable();
             });
         }
+        if (!Schema::hasColumn('settings', 'hero_button_position')) {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->string('hero_button_position')->nullable()->default('bottom-left');
+            });
+        }
     }
 
     /**
@@ -45,6 +50,7 @@ class SettingController extends Controller
             'show_top_student' => 'nullable|boolean',
             'hero_bg_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'remove_hero_bg' => 'nullable|boolean',
+            'hero_button_position' => 'nullable|string|in:bottom-left,bottom-center,bottom-right,middle-left,middle-center,middle-right,top-left,top-center,top-right',
         ]);
 
         $user = auth()->user();
@@ -67,6 +73,9 @@ class SettingController extends Controller
         $settings->telegram_channel_link = $request->telegram_channel_link;
         if ($request->has('show_top_student')) {
             $settings->show_top_student = (bool) $request->show_top_student;
+        }
+        if ($request->has('hero_button_position')) {
+            $settings->hero_button_position = $request->hero_button_position;
         }
 
         // Handle Background Image Reset/Delete

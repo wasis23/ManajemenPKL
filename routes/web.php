@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Schema;
 Route::get('/', function () {
     $showTopStudent = true;
     $heroBgPath = null;
+    $heroButtonPosition = 'bottom-left';
     if (Schema::hasTable('settings')) {
         $settings = Setting::first();
         if (Schema::hasColumn('settings', 'show_top_student')) {
@@ -28,6 +29,9 @@ Route::get('/', function () {
         }
         if (Schema::hasColumn('settings', 'hero_bg_path')) {
             $heroBgPath = $settings?->hero_bg_path;
+        }
+        if (Schema::hasColumn('settings', 'hero_button_position')) {
+            $heroButtonPosition = $settings?->hero_button_position ?? 'bottom-left';
         }
     }
 
@@ -69,6 +73,7 @@ Route::get('/', function () {
         'topStudent' => $topStudent,
         'showTopStudent' => $showTopStudent,
         'heroBgPath' => $heroBgPath,
+        'heroButtonPosition' => $heroButtonPosition,
         'tasks' => $tasks,
     ]);
 });

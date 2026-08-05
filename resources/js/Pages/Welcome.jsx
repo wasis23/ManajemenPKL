@@ -3,9 +3,22 @@ import React, { useState } from 'react';
 import ThemeToggle from '@/Components/ThemeToggle';
 import { Compass, Trophy, ArrowRight, Crown, Sparkles, Flame, MapPin, ClipboardList, Building, User, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 
-export default function Welcome({ auth, topStudent = null, showTopStudent = true, tasks = [], heroBgPath = null }) {
+export default function Welcome({ auth, topStudent = null, showTopStudent = true, tasks = [], heroBgPath = null, heroButtonPosition = 'bottom-left' }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+
+    // Button position class mapping over hero image
+    const positionClasses = {
+        'bottom-left': 'bottom-6 left-6 sm:bottom-10 sm:left-10',
+        'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2 sm:bottom-10',
+        'bottom-right': 'bottom-6 right-6 sm:bottom-10 sm:right-10',
+        'middle-left': 'top-1/2 -translate-y-1/2 left-6 sm:left-10',
+        'middle-center': 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+        'middle-right': 'top-1/2 -translate-y-1/2 right-6 sm:right-10',
+        'top-left': 'top-6 left-6 sm:top-10 sm:left-10',
+        'top-center': 'top-6 left-1/2 -translate-x-1/2 sm:top-10',
+        'top-right': 'top-6 right-6 sm:top-10 sm:right-10',
+    }[heroButtonPosition || 'bottom-left'] || 'bottom-6 left-6 sm:bottom-10 sm:left-10';
 
     // Filter tasks based on search term and selected status
     const filteredTasks = tasks.filter(task => {
@@ -29,7 +42,7 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
                 {/* Background Ambient Glows & Grid Mesh */}
                 <div className="absolute -top-24 left-1/4 w-[700px] h-[700px] bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none"></div>
                 <div className="absolute top-1/3 right-10 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[160px] pointer-events-none"></div>
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e120_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e120_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b12_1px,transparent_1px),linear-gradient(to_bottom,#1e293b12_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e120_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e120_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b12_1px,transparent_1px),gradient-to_bottom,#1e293b12_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none"></div>
 
                 {/* Header / Navbar */}
                 <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-900 transition-colors duration-300">
@@ -82,107 +95,51 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
                 <main className="max-w-7xl mx-auto w-full px-6 pt-6 pb-16 flex-1 space-y-16 relative z-10">
                     
                     {/* Top Hero Section Container */}
-                    <div className="relative rounded-3xl overflow-hidden p-6 sm:p-10 lg:p-12 border border-slate-200 dark:border-slate-900 bg-white/70 dark:bg-slate-950/40 backdrop-blur-sm shadow-2xl min-h-[320px] sm:min-h-[400px] flex items-center">
-                        
-                        {/* Custom Hero Background Image uploaded by Admin */}
-                        {heroBgPath && (
-                            <div 
-                                className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100"
-                                style={{ backgroundImage: `url(${heroBgPath})` }}
-                            ></div>
-                        )}
-
-                        <div className={`relative z-10 w-full grid grid-cols-1 ${showTopStudent ? 'lg:grid-cols-12' : 'max-w-3xl'} gap-8 items-center`}>
-                            
-                            {/* Hero Section CTA Only (All extra text removed for clean background display) */}
-                            <div className={`${showTopStudent ? 'lg:col-span-6' : 'w-full'} flex items-center min-h-[200px]`}>
-                                <div>
+                    <div className="relative rounded-3xl overflow-hidden shadow-2xl w-full border border-slate-200 dark:border-slate-900 bg-white/70 dark:bg-slate-950/40">
+                        {heroBgPath ? (
+                            <div className="relative w-full">
+                                <img 
+                                    src={heroBgPath} 
+                                    alt="Hero Background" 
+                                    className="w-full h-auto block rounded-3xl object-contain"
+                                />
+                                <div className={`absolute ${positionClasses} z-10`}>
                                     {auth.user ? (
                                         <Link
                                             href={route('dashboard')}
-                                            className="inline-flex px-8 py-4 bg-amber-400 hover:bg-yellow-300 text-slate-950 rounded-2xl text-base sm:text-lg font-extrabold items-center justify-center gap-3 shadow-xl shadow-amber-400/30 hover:shadow-amber-400/50 border border-amber-300 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03]"
+                                            className="inline-flex px-7 py-3.5 sm:px-8 sm:py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-sm sm:text-base font-black items-center justify-center gap-2.5 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03]"
                                         >
-                                            Masuk ke Dashboard <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                                            Masuk ke Dashboard <ArrowRight className="w-5 h-5 text-white stroke-[2.5]" />
                                         </Link>
                                     ) : (
                                         <Link
                                             href={route('tasks.public.create')}
-                                            className="inline-flex px-8 py-4 bg-amber-400 hover:bg-yellow-300 text-slate-950 rounded-2xl text-base sm:text-lg font-extrabold items-center justify-center gap-3 shadow-xl shadow-amber-400/30 hover:shadow-amber-400/50 border border-amber-300 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03]"
+                                            className="inline-flex px-7 py-3.5 sm:px-8 sm:py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-sm sm:text-base font-black items-center justify-center gap-2.5 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03]"
                                         >
-                                            Ajukan Tugas Baru <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                                            Ajukan Tugas Baru <ArrowRight className="w-5 h-5 text-white stroke-[2.5]" />
                                         </Link>
                                     )}
                                 </div>
                             </div>
-
-                            {/* Hall of Fame & Award */}
-                            {showTopStudent && (
-                                <div className="lg:col-span-6 relative flex flex-col justify-center">
-                                    
-                                    {/* Background Glow behind Spotlight */}
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/15 blur-[120px] pointer-events-none"></div>
-
-                                    <div className="space-y-4 relative z-10">
-                                        <div className="space-y-1 text-left">
-                                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold tracking-wider uppercase backdrop-blur-md">
-                                                <Trophy className="w-4 h-4 text-amber-400" />
-                                                <span>Hall of Fame & Award</span>
-                                            </div>
-                                            <h2 className="text-xl sm:text-2xl font-black text-white drop-shadow-md">
-                                                Student of the Month
-                                            </h2>
-                                        </div>
-
-                                        {topStudent && (
-                                            <div className="relative pt-1">
-                                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 bg-slate-950/60 backdrop-blur-md p-4 rounded-2xl border border-amber-500/20 shadow-xl">
-                                                    
-                                                    {/* Profile Photo */}
-                                                    <div className="relative shrink-0">
-                                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-200 p-1 shadow-[0_0_30px_rgba(245,158,11,0.3)] overflow-hidden">
-                                                            {topStudent.photo_path ? (
-                                                                <img src={topStudent.photo_path} alt={topStudent.name} className="w-full h-full rounded-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-3xl font-black text-amber-300">
-                                                                    {topStudent.name?.charAt(0).toUpperCase()}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="absolute -bottom-1 -right-1 bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 p-1.5 rounded-full shadow-lg">
-                                                            <Crown className="w-4 h-4 fill-slate-950" />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Details */}
-                                                    <div className="space-y-1.5 text-center sm:text-left flex-1">
-                                                        <div className="space-y-0.5">
-                                                            <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider">
-                                                                ⭐ {topStudent.period ? `Periode ${topStudent.period}` : 'Champion #1'}
-                                                            </span>
-                                                            <h3 className="text-lg sm:text-xl font-black text-white bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
-                                                                {topStudent.name}
-                                                            </h3>
-                                                            <p className="text-xs font-semibold text-slate-300">
-                                                                {topStudent.school_name || 'Peserta PKL'}
-                                                                {topStudent.major && <span className="text-slate-400"> • {topStudent.major}</span>}
-                                                            </p>
-                                                        </div>
-
-                                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-300 font-bold text-xs">
-                                                            <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400 animate-bounce" />
-                                                            <span>{topStudent.points} Poin Kinerja</span>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        )}
-
-                                    </div>
-                                </div>
-                            )}
-
-                        </div>
+                        ) : (
+                            <div className="p-8 sm:p-12 min-h-[300px] flex items-center justify-center text-center bg-gradient-to-tr from-indigo-900 via-slate-900 to-indigo-950 rounded-3xl">
+                                {auth.user ? (
+                                    <Link
+                                        href={route('dashboard')}
+                                        className="inline-flex px-8 py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-base sm:text-lg font-black items-center justify-center gap-3 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03]"
+                                    >
+                                        Masuk ke Dashboard <ArrowRight className="w-5 h-5 text-white stroke-[2.5]" />
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={route('tasks.public.create')}
+                                        className="inline-flex px-8 py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-base sm:text-lg font-black items-center justify-center gap-3 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03]"
+                                    >
+                                        Ajukan Tugas Baru <ArrowRight className="w-5 h-5 text-white stroke-[2.5]" />
+                                    </Link>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Bottom Section: Integrated Live Task List */}

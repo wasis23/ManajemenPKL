@@ -489,7 +489,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         telegram_channel_link: settings?.telegram_channel_link || '',
         show_top_student: settings?.show_top_student !== undefined && settings?.show_top_student !== null ? Boolean(settings.show_top_student) : true,
         hero_bg_image: null,
-        remove_hero_bg: false
+        remove_hero_bg: false,
+        hero_button_position: settings?.hero_button_position || 'bottom-left'
     });
 
     const toggleTopStudentForm = useForm({});
@@ -2517,6 +2518,30 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-950 dark:file:text-indigo-300 hover:file:bg-indigo-100 cursor-pointer"
                                                     />
                                                     {settingsForm.errors.hero_bg_image && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.hero_bg_image}</p>}
+                                                </div>
+
+                                                <div className="pt-2">
+                                                    <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                        Posisi Tombol pada Hero Banner
+                                                    </label>
+                                                    <select
+                                                        value={settingsForm.data.hero_button_position}
+                                                        onChange={e => settingsForm.setData('hero_button_position', e.target.value)}
+                                                        className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                                    >
+                                                        <option value="bottom-left">📍 Bawah Kiri (Default)</option>
+                                                        <option value="bottom-center">📍 Bawah Tengah</option>
+                                                        <option value="bottom-right">📍 Bawah Kanan</option>
+                                                        <option value="middle-left">📍 Tengah Kiri</option>
+                                                        <option value="middle-center">📍 Tengah-Tengah (Center)</option>
+                                                        <option value="middle-right">📍 Tengah Kanan</option>
+                                                        <option value="top-left">📍 Atas Kiri</option>
+                                                        <option value="top-center">📍 Atas Tengah</option>
+                                                        <option value="top-right">📍 Atas Kanan</option>
+                                                    </select>
+                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                                                        Pilih lokasi posisi tombol CTA agar menyatu pas dengan komposisi gambar latar belakang yang Anda unggah.
+                                                    </p>
                                                 </div>
                                             </div>
 
