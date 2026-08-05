@@ -3341,8 +3341,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                         
                                         {/* User Creation and Listing Controls */}
                                         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                                                <div>
+                                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                                                <div className="max-w-xl">
                                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                                         <Users className="w-5 h-5 text-indigo-500" />
                                                         Manajemen Akun Pengguna
@@ -3351,10 +3351,10 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         Tambahkan dosen, staf IT, atau anak PKL serta kelola akumulasi poin reward kinerja mereka.
                                                     </p>
                                                 </div>
-                                                <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+                                                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 flex-shrink-0">
                                                     <button
                                                         onClick={resetAllPoints}
-                                                        className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-amber-100 dark:shadow-none transition-all"
+                                                        className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-amber-200 dark:shadow-none transition-all whitespace-nowrap"
                                                         title="Reset poin seluruh anak PKL menjadi 0"
                                                     >
                                                         <RefreshCw className="w-4 h-4" />
@@ -3362,7 +3362,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     </button>
                                                     <button
                                                         onClick={() => setShowAddUserModal(!showAddUserModal)}
-                                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-100 dark:shadow-none"
+                                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-indigo-200 dark:shadow-none transition-all whitespace-nowrap"
                                                     >
                                                         <UserPlus className="w-4 h-4" />
                                                         Tambah Pengguna
