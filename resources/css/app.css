@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html, body {
+    min-width: 1280px !important;
+    overflow-x: auto;
+}
