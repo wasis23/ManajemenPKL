@@ -9,16 +9,22 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\AgendaController;
+use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    $topStudent = User::where('role', 'anak_pkl')
+        ->orderBy('points', 'desc')
+        ->first(['id', 'name', 'points', 'school_name', 'major', 'social_media']);
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'topStudent' => $topStudent,
     ]);
 });
 
