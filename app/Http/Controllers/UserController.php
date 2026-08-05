@@ -164,4 +164,18 @@ class UserController extends Controller
 
         return redirect()->back()->with('success', 'Akun pengguna berhasil dihapus.');
     }
+
+    /**
+     * Reset points for all anak PKL students (Admin only)
+     */
+    public function resetAllPoints()
+    {
+        if (auth()->user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Hanya administrator yang dapat mereset poin.');
+        }
+
+        User::where('role', 'anak_pkl')->update(['points' => 0]);
+
+        return redirect()->back()->with('success', 'Poin seluruh anak PKL berhasil direset menjadi 0.');
+    }
 }

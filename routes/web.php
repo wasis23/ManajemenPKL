@@ -71,6 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/schools', [SchoolController::class, 'store'])->name('schools.store');
         Route::delete('/schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::post('/users/reset-points', [UserController::class, 'resetAllPoints'])->name('users.reset-points');
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::patch('/users/{user}/points', [UserController::class, 'updatePoints'])->name('users.points.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');

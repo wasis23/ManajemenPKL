@@ -926,6 +926,14 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         }
     };
 
+    const resetAllPoints = () => {
+        if (confirm('Apakah Anda yakin ingin mereset poin SELURUH anak PKL menjadi 0? Tindakan ini tidak dapat dibatalkan.')) {
+            router.post(route('users.reset-points'), {}, {
+                preserveScroll: true
+            });
+        }
+    };
+
     const createSchool = (e) => {
         e.preventDefault();
         schoolForm.post(route('schools.store'), {
@@ -3343,13 +3351,23 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         Tambahkan dosen, staf IT, atau anak PKL serta kelola akumulasi poin reward kinerja mereka.
                                                     </p>
                                                 </div>
-                                                <button
-                                                    onClick={() => setShowAddUserModal(!showAddUserModal)}
-                                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 self-start sm:self-center shadow-md shadow-indigo-100 dark:shadow-none"
-                                                >
-                                                    <UserPlus className="w-4 h-4" />
-                                                    Tambah Pengguna
-                                                </button>
+                                                <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+                                                    <button
+                                                        onClick={resetAllPoints}
+                                                        className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-amber-100 dark:shadow-none transition-all"
+                                                        title="Reset poin seluruh anak PKL menjadi 0"
+                                                    >
+                                                        <RefreshCw className="w-4 h-4" />
+                                                        Reset Poin Semua Anak PKL
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setShowAddUserModal(!showAddUserModal)}
+                                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-100 dark:shadow-none"
+                                                    >
+                                                        <UserPlus className="w-4 h-4" />
+                                                        Tambah Pengguna
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             {/* Add User Collapse Form */}
@@ -3827,7 +3845,6 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         <tr>
                                                             <th scope="col" className="px-6 py-3">Nama Pengguna</th>
                                                             <th scope="col" className="px-6 py-3">Email</th>
-                                                            <th scope="col" className="px-6 py-3">Peran / Role</th>
                                                             <th scope="col" className="px-6 py-3">Akumulasi Poin</th>
                                                             <th scope="col" className="px-6 py-3 text-right">Aksi</th>
                                                         </tr>
@@ -3848,12 +3865,6 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                         )}
                                                                         {u.social_media && <div>Sosmed: {u.social_media}</div>}
                                                                     </div>
-                                                                </td>
-                                                                <td className="px-6 py-4 text-xs">{u.email}</td>
-                                                                <td className="px-6 py-4">
-                                                                    <span className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase">
-                                                                        ANAK PKL
-                                                                    </span>
                                                                     {Array.isArray(u.pic_labs) && u.pic_labs.length > 0 && (
                                                                         <div className="flex flex-wrap gap-1 mt-1.5">
                                                                             {u.pic_labs.map(labId => {
@@ -3867,6 +3878,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                         </div>
                                                                     )}
                                                                 </td>
+                                                                <td className="px-6 py-4 text-xs">{u.email}</td>
                                                                 <td className="px-6 py-4 font-bold">
                                                                     <div className="flex items-center gap-2">
                                                                         <span>{u.points} Poin</span>
@@ -3900,12 +3912,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         {/* Staff & Dosen list */}
                                                         {tasks.staff?.map((u) => (
                                                             <tr key={u.id} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                                                <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{u.name}</td>
-                                                                <td className="px-6 py-4 text-xs">{u.email}</td>
-                                                                <td className="px-6 py-4">
-                                                                    <span className="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase">
-                                                                        {u.role}
-                                                                    </span>
+                                                                <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">
+                                                                    <div>{u.name}</div>
                                                                     {Array.isArray(u.pic_labs) && u.pic_labs.length > 0 && (
                                                                         <div className="flex flex-wrap gap-1 mt-1.5">
                                                                             {u.pic_labs.map(labId => {
@@ -3919,6 +3927,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                         </div>
                                                                     )}
                                                                 </td>
+                                                                <td className="px-6 py-4 text-xs">{u.email}</td>
                                                                 <td className="px-6 py-4 text-xs text-gray-400">-</td>
                                                                 <td className="px-6 py-4 text-right flex justify-end gap-2">
                                                                     <button
