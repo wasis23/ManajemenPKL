@@ -4,16 +4,41 @@ namespace App\Http\Controllers;
 
 use App\Models\TopStudent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class TopStudentController extends Controller
 {
     /**
+     * Ensure top_students database table exists on production
+     */
+    private function ensureTopStudentsTableExists()
+    {
+        if (!Schema::hasTable('top_students')) {
+            Schema::create('top_students', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('school_name');
+                $table->string('major')->nullable();
+                $table->string('period')->nullable();
+                $table->integer('points')->default(0);
+                $table->string('photo_path')->nullable();
+                $table->text('description')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
+    }
+
+    /**
      * Display a listing of the top students for Admin.
      */
     public function index()
     {
+        $this->ensureTopStudentsTableExists();
+
         $topStudents = TopStudent::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('TopStudents/Index', [
@@ -26,6 +51,8 @@ class TopStudentController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureTopStudentsTableExists();
+
         $request->validate([
             'name' => 'required|string|max:255',
             'school_name' => 'required|string|max:255',
@@ -66,6 +93,8 @@ class TopStudentController extends Controller
      */
     public function update(Request $request, TopStudent $topStudent)
     {
+        $this->ensureTopStudentsTableExists();
+
         $request->validate([
             'name' => 'required|string|max:255',
             'school_name' => 'required|string|max:255',
@@ -109,6 +138,8 @@ class TopStudentController extends Controller
      */
     public function toggleActive(TopStudent $topStudent)
     {
+        $this->ensureTopStudentsTableExists();
+
         $newStatus = !$topStudent->is_active;
 
         if ($newStatus) {
@@ -128,6 +159,8 @@ class TopStudentController extends Controller
      */
     public function destroy(TopStudent $topStudent)
     {
+        $this->ensureTopStudentsTableExists();
+
         if ($topStudent->photo_path) {
             $oldPath = str_replace('/storage/', '', $topStudent->photo_path);
             Storage::disk('public')->delete($oldPath);
