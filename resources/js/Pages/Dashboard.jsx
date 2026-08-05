@@ -489,6 +489,13 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         telegram_channel_link: settings?.telegram_channel_link || ''
     });
 
+    const toggleTopStudentForm = useForm({});
+    const handleToggleTopStudent = () => {
+        toggleTopStudentForm.post(route('settings.toggle-top-student'), {
+            preserveScroll: true,
+        });
+    };
+
     const userForm = useForm({
         name: '',
         email: '',
@@ -2416,6 +2423,42 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                         required
                                                     />
                                                     {settingsForm.errors.work_hour_end && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.work_hour_end}</p>}
+                                                </div>
+                                            </div>
+
+                                            {/* Front Page Feature Settings: Top PKL Student Toggle */}
+                                            <div className="p-4 bg-amber-50/40 dark:bg-amber-950/20 rounded-xl border border-amber-200/60 dark:border-amber-900/40 space-y-3 mb-4">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div className="space-y-0.5">
+                                                        <h4 className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                            <Trophy className="w-4 h-4 text-amber-500" />
+                                                            Tampilan "Anak PKL Terbaik" di Halaman Depan
+                                                        </h4>
+                                                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                            Aktifkan atau nonaktifkan panggung penghargaan Anak PKL Terbaik (Student of the Month) pada halaman landing page publik.
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleToggleTopStudent}
+                                                        disabled={toggleTopStudentForm.processing}
+                                                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${
+                                                            settings?.show_top_student ?? true ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-700'
+                                                        }`}
+                                                    >
+                                                        <span
+                                                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                                settings?.show_top_student ?? true ? 'translate-x-5' : 'translate-x-0'
+                                                            }`}
+                                                        />
+                                                    </button>
+                                                </div>
+                                                <div className="flex items-center gap-2 pt-1">
+                                                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                                        settings?.show_top_student ?? true ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
+                                                    }`}>
+                                                        Status: {settings?.show_top_student ?? true ? 'AKTIF (Tampil di Halaman Depan)' : 'NONAKTIF (Disembunyikan)'}
+                                                    </span>
                                                 </div>
                                             </div>
 

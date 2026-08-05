@@ -12,12 +12,18 @@ use App\Http\Controllers\AgendaController;
 use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Models\Setting;
 
 Route::get('/', function () {
-    $topStudent = User::where('role', 'anak_pkl')
-        ->orderBy('points', 'desc')
-        ->first(['id', 'name', 'points', 'school_name', 'major', 'social_media']);
+    $settings = Setting::first();
+    $showTopStudent = $settings ? (bool)$settings->show_top_student : true;
+
+    $topStudent = null;
+    if ($showTopStudent) {
+        $topStudent = User::where('role', 'anak_pkl')
+            ->orderBy('points', 'desc')
+            ->first(['id', 'name', 'points', 'school_name', 'major', 'social_media']);
+    }
 
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -25,6 +31,7 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
         'topStudent' => $topStudent,
+        'showTopStudent' => $showTopStudent,
     ]);
 });
 
@@ -74,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin-only configurations and user accounts management
     Route::middleware('role:admin')->group(function () {
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/toggle-top-student', [SettingController::class, 'toggleTopStudent'])->name('settings.toggle-top-student');
         Route::post('/schools', [SchoolController::class, 'store'])->name('schools.store');
         Route::delete('/schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
