@@ -83,14 +83,10 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
                         
                         {/* Custom Hero Background Image uploaded by Admin */}
                         {heroBgPath && (
-                            <>
-                                <div 
-                                    className="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-105"
-                                    style={{ backgroundImage: `url(${heroBgPath})` }}
-                                ></div>
-                                <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[2px]"></div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/50"></div>
-                            </>
+                            <div 
+                                className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-100"
+                                style={{ backgroundImage: `url(${heroBgPath})` }}
+                            ></div>
                         )}
 
                         <div className={`relative z-10 grid grid-cols-1 ${showTopStudent ? 'lg:grid-cols-12' : 'max-w-3xl mx-auto'} gap-10 lg:gap-16 items-center`}>
