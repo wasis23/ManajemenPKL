@@ -17,7 +17,7 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     $settings = Setting::first();
-    $showTopStudent = $settings ? (bool)$settings->show_top_student : true;
+    $showTopStudent = (bool) ($settings->show_top_student ?? true);
 
     $topStudent = null;
     if ($showTopStudent) {

@@ -486,7 +486,8 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         work_hour_end: settings?.work_hour_end ? settings.work_hour_end.substring(0, 5) : '16:00',
         telegram_bot_token: settings?.telegram_bot_token || '',
         telegram_chat_id: settings?.telegram_chat_id || '',
-        telegram_channel_link: settings?.telegram_channel_link || ''
+        telegram_channel_link: settings?.telegram_channel_link || '',
+        show_top_student: settings?.show_top_student !== undefined && settings?.show_top_student !== null ? Boolean(settings.show_top_student) : true
     });
 
     const toggleTopStudentForm = useForm({});

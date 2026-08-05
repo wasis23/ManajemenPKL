@@ -71,7 +71,8 @@ class SettingController extends Controller
             'show_top_student' => true,
         ]);
 
-        $settings->show_top_student = !$settings->show_top_student;
+        $currentValue = $settings->show_top_student ?? true;
+        $settings->show_top_student = !$currentValue;
         $settings->save();
 
         $status = $settings->show_top_student ? 'diaktifkan' : 'dinonaktifkan';
