@@ -51,6 +51,10 @@ Route::get('/', function () {
         }
     }
 
+    $tasks = \App\Models\Task::with('students:id,name,school_name')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -58,6 +62,7 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
         'topStudent' => $topStudent,
         'showTopStudent' => $showTopStudent,
+        'tasks' => $tasks,
     ]);
 });
 
