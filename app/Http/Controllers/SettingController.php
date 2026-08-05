@@ -29,6 +29,16 @@ class SettingController extends Controller
                 $table->string('hero_button_position')->nullable()->default('bottom-left');
             });
         }
+        if (!Schema::hasColumn('settings', 'hero_button_top')) {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->float('hero_button_top')->nullable()->default(50);
+            });
+        }
+        if (!Schema::hasColumn('settings', 'hero_button_left')) {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->float('hero_button_left')->nullable()->default(20);
+            });
+        }
     }
 
     /**
@@ -51,6 +61,8 @@ class SettingController extends Controller
             'hero_bg_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'remove_hero_bg' => 'nullable|boolean',
             'hero_button_position' => 'nullable|string|in:bottom-left,bottom-center,bottom-right,middle-left,middle-center,middle-right,top-left,top-center,top-right',
+            'hero_button_top' => 'nullable|numeric|min:0|max:100',
+            'hero_button_left' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $user = auth()->user();
@@ -76,6 +88,12 @@ class SettingController extends Controller
         }
         if ($request->has('hero_button_position')) {
             $settings->hero_button_position = $request->hero_button_position;
+        }
+        if ($request->has('hero_button_top')) {
+            $settings->hero_button_top = (float) $request->hero_button_top;
+        }
+        if ($request->has('hero_button_left')) {
+            $settings->hero_button_left = (float) $request->hero_button_left;
         }
 
         // Handle Background Image Reset/Delete

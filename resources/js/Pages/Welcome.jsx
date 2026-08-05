@@ -3,22 +3,9 @@ import React, { useState } from 'react';
 import ThemeToggle from '@/Components/ThemeToggle';
 import { Compass, Trophy, ArrowRight, Crown, Sparkles, Flame, MapPin, ClipboardList, Building, User, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 
-export default function Welcome({ auth, topStudent = null, showTopStudent = true, tasks = [], heroBgPath = null, heroButtonPosition = 'bottom-left' }) {
+export default function Welcome({ auth, topStudent = null, showTopStudent = true, tasks = [], heroBgPath = null, heroButtonTop = 50, heroButtonLeft = 20 }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-
-    // Button position class mapping over hero image
-    const positionClasses = {
-        'bottom-left': 'bottom-6 left-6 sm:bottom-10 sm:left-10',
-        'bottom-center': 'bottom-6 left-1/2 -translate-x-1/2 sm:bottom-10',
-        'bottom-right': 'bottom-6 right-6 sm:bottom-10 sm:right-10',
-        'middle-left': 'top-1/2 -translate-y-1/2 left-6 sm:left-10',
-        'middle-center': 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-        'middle-right': 'top-1/2 -translate-y-1/2 right-6 sm:right-10',
-        'top-left': 'top-6 left-6 sm:top-10 sm:left-10',
-        'top-center': 'top-6 left-1/2 -translate-x-1/2 sm:top-10',
-        'top-right': 'top-6 right-6 sm:top-10 sm:right-10',
-    }[heroButtonPosition || 'bottom-left'] || 'bottom-6 left-6 sm:bottom-10 sm:left-10';
 
     // Filter tasks based on search term and selected status
     const filteredTasks = tasks.filter(task => {
@@ -103,20 +90,27 @@ export default function Welcome({ auth, topStudent = null, showTopStudent = true
                                     alt="Hero Background" 
                                     className="w-full h-auto block rounded-3xl object-contain"
                                 />
-                                <div className={`absolute ${positionClasses} z-10`}>
+                                <div 
+                                    className="absolute z-10 transition-all duration-75"
+                                    style={{
+                                        top: `${heroButtonTop}%`,
+                                        left: `${heroButtonLeft}%`,
+                                        transform: 'translate(-50%, -50%)',
+                                    }}
+                                >
                                     {auth.user ? (
                                         <Link
                                             href={route('dashboard')}
-                                            className="inline-flex px-7 py-3.5 sm:px-8 sm:py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-sm sm:text-base font-black items-center justify-center gap-2.5 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03]"
+                                            className="inline-flex px-4 py-2 sm:px-8 sm:py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-xl sm:rounded-2xl text-xs sm:text-base font-black items-center justify-center gap-1.5 sm:gap-2.5 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03] whitespace-nowrap"
                                         >
-                                            Masuk ke Dashboard <ArrowRight className="w-5 h-5 text-white stroke-[2.5]" />
+                                            Masuk ke Dashboard <ArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
                                         </Link>
                                     ) : (
                                         <Link
                                             href={route('tasks.public.create')}
-                                            className="inline-flex px-7 py-3.5 sm:px-8 sm:py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-sm sm:text-base font-black items-center justify-center gap-2.5 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03]"
+                                            className="inline-flex px-4 py-2 sm:px-8 sm:py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-xl sm:rounded-2xl text-xs sm:text-base font-black items-center justify-center gap-1.5 sm:gap-2.5 shadow-xl shadow-amber-500/30 border border-amber-400 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03] whitespace-nowrap"
                                         >
-                                            Ajukan Tugas Baru <ArrowRight className="w-5 h-5 text-white stroke-[2.5]" />
+                                            Ajukan Tugas Baru <ArrowRight className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
                                         </Link>
                                     )}
                                 </div>

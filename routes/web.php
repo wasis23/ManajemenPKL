@@ -22,6 +22,8 @@ Route::get('/', function () {
     $showTopStudent = true;
     $heroBgPath = null;
     $heroButtonPosition = 'bottom-left';
+    $heroButtonTop = 50;
+    $heroButtonLeft = 20;
     if (Schema::hasTable('settings')) {
         $settings = Setting::first();
         if (Schema::hasColumn('settings', 'show_top_student')) {
@@ -32,6 +34,12 @@ Route::get('/', function () {
         }
         if (Schema::hasColumn('settings', 'hero_button_position')) {
             $heroButtonPosition = $settings?->hero_button_position ?? 'bottom-left';
+        }
+        if (Schema::hasColumn('settings', 'hero_button_top')) {
+            $heroButtonTop = $settings?->hero_button_top ?? 50;
+        }
+        if (Schema::hasColumn('settings', 'hero_button_left')) {
+            $heroButtonLeft = $settings?->hero_button_left ?? 20;
         }
     }
 
@@ -74,6 +82,8 @@ Route::get('/', function () {
         'showTopStudent' => $showTopStudent,
         'heroBgPath' => $heroBgPath,
         'heroButtonPosition' => $heroButtonPosition,
+        'heroButtonTop' => $heroButtonTop,
+        'heroButtonLeft' => $heroButtonLeft,
         'tasks' => $tasks,
     ]);
 });

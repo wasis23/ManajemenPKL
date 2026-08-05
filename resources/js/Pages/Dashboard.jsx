@@ -490,7 +490,9 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         show_top_student: settings?.show_top_student !== undefined && settings?.show_top_student !== null ? Boolean(settings.show_top_student) : true,
         hero_bg_image: null,
         remove_hero_bg: false,
-        hero_button_position: settings?.hero_button_position || 'bottom-left'
+        hero_button_position: settings?.hero_button_position || 'bottom-left',
+        hero_button_top: settings?.hero_button_top !== undefined && settings?.hero_button_top !== null ? Number(settings.hero_button_top) : 50,
+        hero_button_left: settings?.hero_button_left !== undefined && settings?.hero_button_left !== null ? Number(settings.hero_button_left) : 20,
     });
 
     const toggleTopStudentForm = useForm({});
@@ -2520,28 +2522,113 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                     {settingsForm.errors.hero_bg_image && <p className="text-xs text-rose-500 mt-1">{settingsForm.errors.hero_bg_image}</p>}
                                                 </div>
 
-                                                <div className="pt-2">
-                                                    <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                                        Posisi Tombol pada Hero Banner
-                                                    </label>
-                                                    <select
-                                                        value={settingsForm.data.hero_button_position}
-                                                        onChange={e => settingsForm.setData('hero_button_position', e.target.value)}
-                                                        className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-250 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
-                                                    >
-                                                        <option value="bottom-left">📍 Bawah Kiri (Default)</option>
-                                                        <option value="bottom-center">📍 Bawah Tengah</option>
-                                                        <option value="bottom-right">📍 Bawah Kanan</option>
-                                                        <option value="middle-left">📍 Tengah Kiri</option>
-                                                        <option value="middle-center">📍 Tengah-Tengah (Center)</option>
-                                                        <option value="middle-right">📍 Tengah Kanan</option>
-                                                        <option value="top-left">📍 Atas Kiri</option>
-                                                        <option value="top-center">📍 Atas Tengah</option>
-                                                        <option value="top-right">📍 Atas Kanan</option>
-                                                    </select>
-                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-                                                        Pilih lokasi posisi tombol CTA agar menyatu pas dengan komposisi gambar latar belakang yang Anda unggah.
-                                                    </p>
+                                                <div className="pt-2 border-t border-indigo-100 dark:border-indigo-900/30 space-y-4">
+                                                    <div>
+                                                        <h5 className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center justify-between">
+                                                            <span>Koordinat Presisi Tombol pada Hero Banner</span>
+                                                            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+                                                                X: {settingsForm.data.hero_button_left}% | Y: {settingsForm.data.hero_button_top}%
+                                                            </span>
+                                                        </h5>
+                                                        <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                            Geser slider di bawah ini untuk menempatkan posisi tombol secara presisi di atas gambar banner Anda.
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Sliders & Numeric Inputs */}
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        {/* Horizontal Position (X) */}
+                                                        <div className="bg-gray-50 dark:bg-gray-900/60 p-3 rounded-xl border border-gray-200 dark:border-gray-700/60 space-y-2">
+                                                            <div className="flex justify-between items-center text-[11px] font-bold text-gray-700 dark:text-gray-300">
+                                                                <label htmlFor="slider_x">Posisi X / Horisontal (Kiri - Kanan)</label>
+                                                                <div className="flex items-center gap-1">
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        max="100"
+                                                                        value={settingsForm.data.hero_button_left}
+                                                                        onChange={e => settingsForm.setData('hero_button_left', Math.max(0, Math.min(100, Number(e.target.value))))}
+                                                                        className="w-14 px-1.5 py-0.5 text-xs text-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded font-mono font-bold dark:text-white"
+                                                                    />
+                                                                    <span>%</span>
+                                                                </div>
+                                                            </div>
+                                                            <input
+                                                                id="slider_x"
+                                                                type="range"
+                                                                min="0"
+                                                                max="100"
+                                                                step="0.5"
+                                                                value={settingsForm.data.hero_button_left}
+                                                                onChange={e => settingsForm.setData('hero_button_left', Number(e.target.value))}
+                                                                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                                            />
+                                                            <div className="flex justify-between text-[9px] text-gray-400 font-semibold">
+                                                                <span>0% (Kiri)</span>
+                                                                <span>50% (Tengah)</span>
+                                                                <span>100% (Kanan)</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Vertical Position (Y) */}
+                                                        <div className="bg-gray-50 dark:bg-gray-900/60 p-3 rounded-xl border border-gray-200 dark:border-gray-700/60 space-y-2">
+                                                            <div className="flex justify-between items-center text-[11px] font-bold text-gray-700 dark:text-gray-300">
+                                                                <label htmlFor="slider_y">Posisi Y / Vertikal (Atas - Bawah)</label>
+                                                                <div className="flex items-center gap-1">
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        max="100"
+                                                                        value={settingsForm.data.hero_button_top}
+                                                                        onChange={e => settingsForm.setData('hero_button_top', Math.max(0, Math.min(100, Number(e.target.value))))}
+                                                                        className="w-14 px-1.5 py-0.5 text-xs text-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded font-mono font-bold dark:text-white"
+                                                                    />
+                                                                    <span>%</span>
+                                                                </div>
+                                                            </div>
+                                                            <input
+                                                                id="slider_y"
+                                                                type="range"
+                                                                min="0"
+                                                                max="100"
+                                                                step="0.5"
+                                                                value={settingsForm.data.hero_button_top}
+                                                                onChange={e => settingsForm.setData('hero_button_top', Number(e.target.value))}
+                                                                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                                            />
+                                                            <div className="flex justify-between text-[9px] text-gray-400 font-semibold">
+                                                                <span>0% (Atas)</span>
+                                                                <span>50% (Tengah)</span>
+                                                                <span>100% (Bawah)</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Live Preview Box */}
+                                                    {settings?.hero_bg_path && (
+                                                        <div className="space-y-1.5 pt-1">
+                                                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Pratinjau Posisi Tombol Real-time</span>
+                                                            <div className="relative rounded-2xl overflow-hidden border-2 border-indigo-400/40 shadow-inner bg-slate-900 w-full">
+                                                                <img 
+                                                                    src={settings.hero_bg_path} 
+                                                                    alt="Preview Banner" 
+                                                                    className="w-full h-auto block object-contain" 
+                                                                />
+                                                                <div 
+                                                                    className="absolute z-10 transition-all duration-75 pointer-events-none"
+                                                                    style={{
+                                                                        top: `${settingsForm.data.hero_button_top}%`,
+                                                                        left: `${settingsForm.data.hero_button_left}%`,
+                                                                        transform: 'translate(-50%, -50%)',
+                                                                    }}
+                                                                >
+                                                                    <div className="px-3 py-1.5 sm:px-5 sm:py-2 bg-amber-500 text-white rounded-xl text-[10px] sm:text-xs font-black shadow-lg shadow-amber-500/50 border border-amber-400 whitespace-nowrap flex items-center gap-1.5 ring-2 ring-white/80">
+                                                                        Ajukan Tugas Baru →
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
