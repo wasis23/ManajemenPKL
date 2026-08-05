@@ -172,14 +172,35 @@ class DashboardController extends Controller
         // 5. Fetch SIMLAB Data
         $simlabService = app(\App\Services\SimlabService::class);
         $labResponse = $simlabService->getLaboratoriums();
-        $simlabLabs = isset($labResponse['success']) && $labResponse['success'] && isset($labResponse['data']) 
+        $rawSimlabLabs = isset($labResponse['success']) && $labResponse['success'] && isset($labResponse['data']) 
             ? $labResponse['data'] 
             : [];
             
+        $userPicLabs = $user->pic_labs ?? [];
+        $hasRestrictedLabs = !empty($userPicLabs);
+        
+        // Filter available labs based on user's PIC rights (unless user is admin with no pic_labs specified)
+        if ($hasRestrictedLabs) {
+            $simlabLabs = array_values(array_filter($rawSimlabLabs, function ($lab) use ($userPicLabs) {
+                $labId = is_array($lab) ? ($lab['id'] ?? null) : ($lab->id ?? null);
+                return in_array((string)$labId, array_map('strval', $userPicLabs));
+            }));
+        } else {
+            $simlabLabs = $rawSimlabLabs;
+        }
+
         $filters = [];
         if ($request->filled('simlab_lab_id')) {
-            $filters['laboratorium_id'] = $request->query('simlab_lab_id');
+            $reqLabId = $request->query('simlab_lab_id');
+            if ($hasRestrictedLabs && !in_array((string)$reqLabId, array_map('strval', $userPicLabs))) {
+                $filters['laboratorium_id'] = $userPicLabs[0] ?? null;
+            } else {
+                $filters['laboratorium_id'] = $reqLabId;
+            }
+        } elseif ($hasRestrictedLabs && count($userPicLabs) === 1) {
+            $filters['laboratorium_id'] = $userPicLabs[0];
         }
+
         if ($request->filled('simlab_kondisi')) {
             $filters['kondisi'] = $request->query('simlab_kondisi');
         }
@@ -206,7 +227,7 @@ class DashboardController extends Controller
             'simlabLabs' => $simlabLabs,
             'simlabAssets' => $simlabAssets,
             'simlabFilters' => [
-                'laboratorium_id' => $request->query('simlab_lab_id', ''),
+                'laboratorium_id' => $filters['laboratorium_id'] ?? $request->query('simlab_lab_id', ''),
                 'kondisi' => $request->query('simlab_kondisi', ''),
             ],
             'simlabError' => (isset($labResponse['success']) && !$labResponse['success'] ? ($labResponse['message'] ?? 'Gagal mengambil data laboratorium.') : null) 

@@ -18,6 +18,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
             'role' => 'required|string|in:admin,anak_pkl',
+            'pic_labs' => 'nullable|array',
         ];
 
         if ($request->role === 'anak_pkl') {
@@ -42,6 +43,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'pic_labs' => $request->pic_labs ?? [],
             'school_name' => $request->role === 'anak_pkl' ? $request->school_name : null,
             'major' => $request->role === 'anak_pkl' ? $request->major : null,
             'whatsapp_number' => $request->role === 'anak_pkl' ? $request->whatsapp_number : null,
@@ -69,6 +71,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'role' => 'required|string|in:admin,anak_pkl',
             'password' => 'nullable|string|min:6',
+            'pic_labs' => 'nullable|array',
         ];
 
         if ($request->role === 'anak_pkl') {
@@ -88,6 +91,7 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'pic_labs' => $request->pic_labs ?? [],
         ];
 
         if ($request->password) {

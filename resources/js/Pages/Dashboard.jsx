@@ -494,6 +494,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         email: '',
         password: '',
         role: 'anak_pkl',
+        pic_labs: [],
         school_name: '',
         major: '',
         whatsapp_number: '',
@@ -513,6 +514,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
         email: '',
         password: '',
         role: 'anak_pkl',
+        pic_labs: [],
         school_name: '',
         major: '',
         whatsapp_number: '',
@@ -893,6 +895,7 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
             email: u.email,
             password: '',
             role: u.role,
+            pic_labs: u.pic_labs || [],
             school_name: u.school_name || '',
             major: u.major || '',
             whatsapp_number: u.whatsapp_number || '',
@@ -1080,17 +1083,19 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                 Pengaturan Perangkat
                                             </button>
 
-                                            <button
-                                                onClick={() => setActiveTab('simlab')}
-                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                                    activeTab === 'simlab'
-                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
-                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
-                                                }`}
-                                            >
-                                                <Database className="w-5 h-5" />
-                                                Integrasi SIMLAB
-                                            </button>
+                                            {((user?.pic_labs && user.pic_labs.length > 0) || user.role === 'admin') && (
+                                                <button
+                                                    onClick={() => setActiveTab('simlab')}
+                                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                        activeTab === 'simlab'
+                                                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                            : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                    }`}
+                                                >
+                                                    <Database className="w-5 h-5" />
+                                                    Integrasi SIMLAB
+                                                </button>
+                                            )}
                                         </>
                                     )}
 
@@ -1120,17 +1125,19 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                             Agenda Kegiatan
                                         </button>
 
-                                        <button
-                                            onClick={() => setActiveTab('simlab')}
-                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                                activeTab === 'simlab'
-                                                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
-                                                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
-                                            }`}
-                                        >
-                                            <Database className="w-5 h-5" />
-                                            Integrasi SIMLAB
-                                        </button>
+                                        {((user?.pic_labs && user.pic_labs.length > 0) || user.role === 'admin') && (
+                                            <button
+                                                onClick={() => setActiveTab('simlab')}
+                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    activeTab === 'simlab'
+                                                        ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 shadow-sm'
+                                                        : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                                                }`}
+                                            >
+                                                <Database className="w-5 h-5" />
+                                                Integrasi SIMLAB
+                                            </button>
+                                        )}
                                         </>
                                     )}
 
@@ -3392,6 +3399,56 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                 <option value="admin">Administrator</option>
                                                             </select>
                                                         </div>
+
+                                                        {/* Hak Akses PIC Lab SIMLAB */}
+                                                        <div className="sm:col-span-2 bg-indigo-50/70 dark:bg-indigo-950/30 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/50 my-1">
+                                                            <label className="block text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                                                <Database className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                                                Hak Akses PIC Lab (Integrasi SIMLAB)
+                                                            </label>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                                Pilih laboratorium mana saja user ini memiliki hak sebagai PIC. Jika dipilih, menu Integrasi SIMLAB akan aktif di halaman user ini.
+                                                            </p>
+                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                {[
+                                                                    { id: '1', name: 'PIC Lab 1' },
+                                                                    { id: '2', name: 'PIC Lab 2' },
+                                                                    { id: '3', name: 'PIC Lab 3' },
+                                                                    { id: '4', name: 'PIC Lab 4' },
+                                                                    { id: '5', name: 'PIC Lab IoT' },
+                                                                ].map(lab => {
+                                                                    const currentLabs = (userForm.data.pic_labs || []).map(String);
+                                                                    const isChecked = currentLabs.includes(String(lab.id));
+                                                                    return (
+                                                                        <label 
+                                                                            key={lab.id} 
+                                                                            className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                                                                                isChecked 
+                                                                                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                                                                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                                                                            }`}
+                                                                        >
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={isChecked}
+                                                                                onChange={e => {
+                                                                                    if (e.target.checked) {
+                                                                                        userForm.setData('pic_labs', [...currentLabs, String(lab.id)]);
+                                                                                    } else {
+                                                                                        userForm.setData('pic_labs', currentLabs.filter(id => id !== String(lab.id)));
+                                                                                    }
+                                                                                }}
+                                                                                className="sr-only"
+                                                                            />
+                                                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isChecked ? 'bg-white border-white' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900'}`}>
+                                                                                {isChecked && <span className="text-indigo-600 font-extrabold text-[10px]">✓</span>}
+                                                                            </div>
+                                                                            <span>{lab.name}</span>
+                                                                        </label>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </div>
                                                         {userForm.data.role === 'anak_pkl' && (
                                                             <>
                                                                 <div className="sm:col-span-2">
@@ -3592,6 +3649,56 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                  <option value="admin">Administrator</option>
                                                              </select>
                                                          </div>
+
+                                                         {/* Hak Akses PIC Lab SIMLAB */}
+                                                         <div className="sm:col-span-2 bg-indigo-50/70 dark:bg-indigo-950/30 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/50 my-1">
+                                                             <label className="block text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                                                 <Database className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                                                 Hak Akses PIC Lab (Integrasi SIMLAB)
+                                                             </label>
+                                                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                                 Pilih laboratorium mana saja user ini memiliki hak sebagai PIC. Jika dipilih, menu Integrasi SIMLAB akan aktif di halaman user ini.
+                                                             </p>
+                                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                 {[
+                                                                     { id: '1', name: 'PIC Lab 1' },
+                                                                     { id: '2', name: 'PIC Lab 2' },
+                                                                     { id: '3', name: 'PIC Lab 3' },
+                                                                     { id: '4', name: 'PIC Lab 4' },
+                                                                     { id: '5', name: 'PIC Lab IoT' },
+                                                                 ].map(lab => {
+                                                                     const currentLabs = (editUserForm.data.pic_labs || []).map(String);
+                                                                     const isChecked = currentLabs.includes(String(lab.id));
+                                                                     return (
+                                                                         <label 
+                                                                             key={lab.id} 
+                                                                             className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-semibold cursor-pointer transition-all ${
+                                                                                 isChecked 
+                                                                                     ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                                                                                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                                                                             }`}
+                                                                         >
+                                                                             <input
+                                                                                 type="checkbox"
+                                                                                 checked={isChecked}
+                                                                                 onChange={e => {
+                                                                                     if (e.target.checked) {
+                                                                                         editUserForm.setData('pic_labs', [...currentLabs, String(lab.id)]);
+                                                                                     } else {
+                                                                                         editUserForm.setData('pic_labs', currentLabs.filter(id => id !== String(lab.id)));
+                                                                                     }
+                                                                                 }}
+                                                                                 className="sr-only"
+                                                                             />
+                                                                             <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isChecked ? 'bg-white border-white' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900'}`}>
+                                                                                 {isChecked && <span className="text-indigo-600 font-extrabold text-[10px]">✓</span>}
+                                                                             </div>
+                                                                             <span>{lab.name}</span>
+                                                                         </label>
+                                                                     );
+                                                                 })}
+                                                             </div>
+                                                         </div>
                                                          {editUserForm.data.role === 'anak_pkl' && (
                                                              <>
                                                                  <div className="sm:col-span-2">
@@ -3747,6 +3854,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                     <span className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase">
                                                                         ANAK PKL
                                                                     </span>
+                                                                    {Array.isArray(u.pic_labs) && u.pic_labs.length > 0 && (
+                                                                        <div className="flex flex-wrap gap-1 mt-1.5">
+                                                                            {u.pic_labs.map(labId => {
+                                                                                const labNames = { '1': 'Lab 1', '2': 'Lab 2', '3': 'Lab 3', '4': 'Lab 4', '5': 'Lab IoT' };
+                                                                                return (
+                                                                                    <span key={labId} className="bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                                                                        PIC {labNames[String(labId)] || `Lab ${labId}`}
+                                                                                    </span>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    )}
                                                                 </td>
                                                                 <td className="px-6 py-4 font-bold">
                                                                     <div className="flex items-center gap-2">
@@ -3787,6 +3906,18 @@ export default function Dashboard({ settings, leaderboard, todayAttendance, task
                                                                     <span className="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 text-xs font-bold px-2 py-0.5 rounded-full uppercase">
                                                                         {u.role}
                                                                     </span>
+                                                                    {Array.isArray(u.pic_labs) && u.pic_labs.length > 0 && (
+                                                                        <div className="flex flex-wrap gap-1 mt-1.5">
+                                                                            {u.pic_labs.map(labId => {
+                                                                                const labNames = { '1': 'Lab 1', '2': 'Lab 2', '3': 'Lab 3', '4': 'Lab 4', '5': 'Lab IoT' };
+                                                                                return (
+                                                                                    <span key={labId} className="bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                                                                        PIC {labNames[String(labId)] || `Lab ${labId}`}
+                                                                                    </span>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    )}
                                                                 </td>
                                                                 <td className="px-6 py-4 text-xs text-gray-400">-</td>
                                                                 <td className="px-6 py-4 text-right flex justify-end gap-2">
