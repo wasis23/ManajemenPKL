@@ -4,9 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 
 class SettingController extends Controller
 {
+    /**
+     * Ensure show_top_student column exists on database table
+     */
+    private function ensureShowTopStudentColumnExists()
+    {
+        if (!Schema::hasColumn('settings', 'show_top_student')) {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->boolean('show_top_student')->default(true);
+            });
+        }
+    }
+
     /**
      * Update geofencing configurations (Admin only)
      */
@@ -30,6 +44,8 @@ class SettingController extends Controller
         if ($user->role !== 'admin') {
             return redirect()->back()->with('error', 'Hanya administrator yang dapat mengubah pengaturan.');
         }
+
+        $this->ensureShowTopStudentColumnExists();
 
         $settings = Setting::first() ?? new Setting();
         $settings->latitude = $request->latitude;
@@ -59,6 +75,8 @@ class SettingController extends Controller
         if ($user->role !== 'admin') {
             return redirect()->back()->with('error', 'Hanya administrator yang dapat mengubah pengaturan.');
         }
+
+        $this->ensureShowTopStudentColumnExists();
 
         $settings = Setting::first() ?? Setting::create([
             'latitude' => -7.2574719,

@@ -14,10 +14,14 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Models\Setting;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Schema;
 
 Route::get('/', function () {
-    $settings = Setting::first();
-    $showTopStudent = (bool) ($settings->show_top_student ?? true);
+    $showTopStudent = true;
+    if (Schema::hasTable('settings') && Schema::hasColumn('settings', 'show_top_student')) {
+        $settings = Setting::first();
+        $showTopStudent = (bool) ($settings?->show_top_student ?? true);
+    }
 
     $topStudent = null;
     if ($showTopStudent) {
