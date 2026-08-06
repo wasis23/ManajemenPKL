@@ -1,11 +1,29 @@
 import { Head, Link } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ThemeToggle from '@/Components/ThemeToggle';
 import { Compass, Trophy, ArrowRight, Crown, Sparkles, Flame, MapPin, ClipboardList, Building, User, Clock, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function Welcome({ auth, topStudent = null, showTopStudent = true, tasks = [], heroBgPath = null, heroButtonTop = 50, heroButtonLeft = 20 }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+
+    // Force Desktop View only for Landing Page
+    useEffect(() => {
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            viewport.setAttribute('content', 'width=1280');
+        }
+        document.body.style.minWidth = '1280px';
+        document.body.style.overflowX = 'auto';
+
+        return () => {
+            if (viewport) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+            }
+            document.body.style.minWidth = '';
+            document.body.style.overflowX = '';
+        };
+    }, []);
 
     // Filter tasks based on search term and selected status
     const filteredTasks = tasks.filter(task => {
